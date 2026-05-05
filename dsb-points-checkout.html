@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DSB Plus – Points Checkout Screens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Caveat:wght@400;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --color-primary: #2F4DB8;
+      --color-primary-dark: #1F2F7A;
+      --color-background: #F8F7F2;
+      --color-surface: #FFFFFF;
+      --color-surface-warm: #E9DFC9;
+      --color-blue-light: #DDE7FF;
+      --color-accent-coral: #EF8E7D;
+      --color-accent-brown: #7A5A3A;
+      --color-success: #6BAA75;
+      --color-warning: #F2C94C;
+      --color-error: #D94A4A;
+      --font-ui: 'Inter', sans-serif;
+      --font-body: 'IBM Plex Sans', sans-serif;
+      --font-display: 'Caveat', cursive;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-pill: 999px;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #E4E2DA;
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 32px;
+      gap: 40px;
+    }
+
+    .page-title {
+      text-align: center;
+    }
+    .page-title h1 {
+      font-family: var(--font-ui);
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a2e;
+      letter-spacing: -0.3px;
+    }
+    .page-title p {
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    .screens-row {
+      display: flex;
+      gap: 36px;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── Phone shell ── */
+    .phone-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .screen-label {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #888;
+    }
+
+    .phone {
+      width: 375px;
+      min-height: 812px;
+      background: var(--color-background);
+      border-radius: 44px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1.5px #bbb,
+        0 0 0 4px #d0cfc8,
+        0 24px 64px rgba(0,0,0,0.18),
+        0 4px 16px rgba(0,0,0,0.10);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* status bar */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 24px 0;
+      height: 50px;
+      flex-shrink: 0;
+    }
+    .status-bar .time {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+    .status-icons {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .status-icons svg { width: 16px; height: 16px; fill: #1a1a2e; }
+
+    /* Dynamic island */
+    .dynamic-island {
+      width: 120px;
+      height: 34px;
+      background: #1a1a1a;
+      border-radius: 20px;
+      margin: 6px auto 0;
+      flex-shrink: 0;
+    }
+
+    /* nav bar */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px 12px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .nav-back {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-pill);
+      background: var(--color-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+    }
+    .nav-back svg { width: 18px; height: 18px; stroke: var(--color-primary); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .nav-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #888;
+      margin-left: 2px;
+    }
+    .nav-right {
+      margin-left: auto;
+    }
+    .dsb-logo {
+      font-family: var(--font-ui);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-primary);
+      letter-spacing: -0.5px;
+    }
+
+    /* scroll content */
+    .phone-content {
+      flex: 1;
+      overflow: hidden;
+      padding: 0 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ── Shared components ── */
+    .hero-card {
+      background: var(--color-primary);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px 24px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+    .hero-card::after {
+      content: '';
+      position: absolute;
+      bottom: -30px; left: 20px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 8px;
+    }
+    .hero-heading {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -0.3px;
+    }
+    .check-icon {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .check-icon svg { width: 22px; height: 22px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    .trip-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+    }
+    .trip-card-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 14px;
+    }
+    .trip-route {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .route-point {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .route-city {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .route-time {
+      font-size: 12px;
+      color: #888;
+      font-family: var(--font-body);
+    }
+    .route-arrow {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .route-line {
+      height: 1.5px;
+      width: 100%;
+      background: #e0e0e0;
+      position: relative;
+    }
+    .route-line::after {
+      content: '▸';
+      position: absolute;
+      right: -4px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: #ccc;
+    }
+    .route-duration {
+      font-size: 10px;
+      color: #bbb;
+      font-family: var(--font-body);
+    }
+    .trip-meta {
+      display: flex;
+      gap: 16px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .trip-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .trip-meta-label {
+      font-size: 10px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .trip-meta-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    .cta-btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border-radius: var(--radius-pill);
+      border: none;
+      font-family: var(--font-ui);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      letter-spacing: -0.1px;
+    }
+    .cta-primary {
+      background: var(--color-primary);
+      color: white;
+    }
+    .cta-secondary {
+      background: transparent;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .home-indicator {
+      width: 134px;
+      height: 5px;
+      background: #1a1a2e;
+      border-radius: 3px;
+      margin: 10px auto 16px;
+      opacity: 0.15;
+      flex-shrink: 0;
+    }
+
+    /* ─────────────────────────────────────────── */
+    /* SCREEN 1 – annotation callouts              */
+    /* ─────────────────────────────────────────── */
+    .annotation-wrap {
+      position: relative;
+    }
+    .callout {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: #FFF8E6;
+      border: 1.5px dashed #F2C94C;
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+    }
+    .callout-dot {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #F2C94C;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #7A5A00;
+      margin-top: 1px;
+    }
+    .callout-text {
+      font-size: 11.5px;
+      color: #7A5A00;
+      font-family: var(--font-body);
+      line-height: 1.4;
+    }
+
+    .empty-state-card {
+      background: #f4f3ee;
+      border-radius: var(--radius-md);
+      padding: 20px;
+      border: 1.5px dashed #ddd;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+    }
+    .empty-state-card svg { opacity: 0.25; }
+    .empty-state-text {
+      font-size: 13px;
+      color: #bbb;
+      font-family: var(--font-body);
+    }
+
+    /* ─────────────────────────────────────────── */
+    /* SCREEN 2 – points reward card               */
+    /* ─────────────────────────────────────────── */
+    .points-card {
+      background: var(--color-blue-light);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .points-card-inner {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .points-illustration {
+      flex-shrink: 0;
+      width: 64px;
+      height: 64px;
+    }
+    .points-text {
+      flex: 1;
+    }
+    .points-earned {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-primary-dark);
+      letter-spacing: -0.1px;
+    }
+    .points-total {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-primary);
+      letter-spacing: -0.5px;
+      margin: 2px 0 4px;
+    }
+    .points-reward-hint {
+      font-family: var(--font-display);
+      font-size: 15px;
+      color: var(--color-accent-brown);
+      font-weight: 600;
+    }
+
+    /* progress bar */
+    .progress-wrap {
+      margin-top: 14px;
+    }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .progress-label {
+      font-size: 10.5px;
+      color: var(--color-primary-dark);
+      opacity: 0.7;
+      font-family: var(--font-body);
+    }
+    .progress-bar {
+      height: 6px;
+      background: rgba(47, 77, 184, 0.15);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--color-primary);
+      border-radius: var(--radius-pill);
+      width: 51%;
+    }
+    .progress-milestones {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .milestone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .milestone-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #c0cdee;
+    }
+    .milestone-dot.reached {
+      background: var(--color-primary);
+    }
+    .milestone-label {
+      font-size: 9.5px;
+      color: #888;
+      font-family: var(--font-body);
+      text-align: center;
+    }
+    .milestone-label span {
+      font-family: var(--font-display);
+      font-size: 10px;
+      color: var(--color-accent-brown);
+      display: block;
+    }
+
+    .this-trip-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(47,77,184,0.12);
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      margin-bottom: 10px;
+    }
+    .this-trip-badge svg { width: 12px; height: 12px; stroke: var(--color-primary); fill: none; stroke-width: 2; stroke-linecap: round; }
+    .this-trip-badge span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    /* ─────────────────────────────────────────── */
+    /* SCREEN 3 – non-plus upsell card             */
+    /* ─────────────────────────────────────────── */
+    .upsell-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-md);
+      padding: 22px 20px;
+      border: 1.5px solid #e8e5dc;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .upsell-top {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .upsell-illustration {
+      width: 56px; height: 56px;
+      flex-shrink: 0;
+    }
+    .upsell-text-block {
+      flex: 1;
+    }
+    .upsell-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+    .upsell-heading {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a2e;
+      line-height: 1.3;
+      letter-spacing: -0.2px;
+    }
+    .upsell-body {
+      font-size: 13px;
+      color: #666;
+      font-family: var(--font-body);
+      line-height: 1.5;
+    }
+    .upsell-divider {
+      height: 1px;
+      background: #f0ede5;
+    }
+
+    .dsb-plus-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--color-blue-light);
+      border-radius: var(--radius-pill);
+      padding: 5px 11px;
+      margin-bottom: 12px;
+    }
+    .dsb-plus-badge span {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-primary);
+      letter-spacing: 0.3px;
+    }
+
+    /* ─────────────────────────────────────────── */
+    /* Hero card variant – warmer tone S2          */
+    /* ─────────────────────────────────────────── */
+    .hero-card-s2 {
+      background: linear-gradient(135deg, #2F4DB8 0%, #1F2F7A 100%);
+    }
+    .hero-card-s2 .hero-sub {
+      font-size: 13px;
+      opacity: 0.75;
+      margin-top: 6px;
+      font-family: var(--font-body);
+    }
+
+    /* section divider label */
+    .divider-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 2px 0;
+    }
+    .divider-label::before,
+    .divider-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e0ddd6;
+    }
+    .divider-label span {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: #bbb;
+      font-family: var(--font-body);
+    }
+
+    .spacer { flex: 1; }
+
+    /* ─────────────────────────────────────────── */
+    /* Coffee SVG illustration (inline)            */
+    /* ─────────────────────────────────────────── */
+    .illus-coffee { display: block; }
+    .illus-star { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="page-title">
+    <h1>DSB Plus — Points Checkout Flow</h1>
+    <p>UX case study · Three mobile screens · Scandinavian UI · May 2026</p>
+  </div>
+
+  <div class="screens-row">
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SCREEN 1 · Current checkout (problem state) -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="phone-wrap">
+      <span class="screen-label">Screen 1 · Current state</span>
+      <div class="phone">
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24"><path d="M1 6C5.5 1.5 18.5 1.5 23 6M5 10c3.5-3.5 10.5-3.5 14 0M9 14c1.5-1.5 5.5-1.5 7 0M12 18h.01" stroke="#1a1a2e" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="16" height="10" rx="2" stroke="#1a1a2e" stroke-width="1.8" fill="none"/><path d="M18 11h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2" stroke="#1a1a2e" stroke-width="1.8" fill="none"/><rect x="4" y="9" width="10" height="6" rx="1" fill="#1a1a2e"/></svg>
+          </div>
+        </div>
+        <div class="dynamic-island"></div>
+
+        <div class="nav-bar">
+          <button class="nav-back" aria-label="Back">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="nav-title">My journeys</span>
+          <div class="nav-right"><span class="dsb-logo">DSB</span></div>
+        </div>
+
+        <div class="phone-content">
+
+          <!-- Hero -->
+          <div class="hero-card">
+            <div class="check-icon">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="hero-eyebrow">Trip completed</div>
+            <div class="hero-heading">Thank you for<br>traveling with us</div>
+          </div>
+
+          <!-- Trip summary -->
+          <div class="trip-card">
+            <div class="trip-card-label">Journey summary</div>
+            <div class="trip-route">
+              <div class="route-point">
+                <div class="route-city">CPH</div>
+                <div class="route-time">07:32</div>
+              </div>
+              <div class="route-arrow">
+                <div class="route-line"></div>
+                <div class="route-duration">1h 15m · IC Train</div>
+              </div>
+              <div class="route-point" style="text-align:right">
+                <div class="route-city">ODN</div>
+                <div class="route-time">08:47</div>
+              </div>
+            </div>
+            <div class="trip-meta">
+              <div class="trip-meta-item">
+                <span class="trip-meta-label">Date</span>
+                <span class="trip-meta-value">5 May 2026</span>
+              </div>
+              <div class="trip-meta-item">
+                <span class="trip-meta-label">Class</span>
+                <span class="trip-meta-value">2nd class</span>
+              </div>
+              <div class="trip-meta-item">
+                <span class="trip-meta-label">Ticket</span>
+                <span class="trip-meta-value">Orange</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Missing reward feedback – annotation -->
+          <div class="annotation-wrap">
+            <div class="callout">
+              <div class="callout-dot">!</div>
+              <div class="callout-text"><strong>No feedback about earned points</strong> — the user has no idea whether this trip contributed to any rewards balance.</div>
+            </div>
+          </div>
+
+          <!-- Empty state where points would be -->
+          <div class="empty-state-card">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="1.5" stroke-linecap="round">
+              <circle cx="12" cy="12" r="9"/><path d="M12 8v4l2 2"/>
+            </svg>
+            <div class="empty-state-text">No rewards information shown</div>
+          </div>
+
+          <!-- Second annotation -->
+          <div class="annotation-wrap">
+            <div class="callout">
+              <div class="callout-dot">!</div>
+              <div class="callout-text"><strong>No link between completed trip and DSB Plus value</strong> — a missed opportunity to reinforce the benefits of being a Plus member.</div>
+            </div>
+          </div>
+
+          <div class="spacer"></div>
+
+          <button class="cta-btn cta-primary" style="background:#e0ddd6;color:#aaa;">Close</button>
+
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SCREEN 2 · Improved – DSB Plus user        -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="phone-wrap">
+      <span class="screen-label">Screen 2 · DSB Plus member</span>
+      <div class="phone">
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24"><path d="M1 6C5.5 1.5 18.5 1.5 23 6M5 10c3.5-3.5 10.5-3.5 14 0M9 14c1.5-1.5 5.5-1.5 7 0M12 18h.01" stroke="#1a1a2e" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="16" height="10" rx="2" stroke="#1a1a2e" stroke-width="1.8" fill="none"/><path d="M18 11h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2" stroke="#1a1a2e" stroke-width="1.8" fill="none"/><rect x="4" y="9" width="10" height="6" rx="1" fill="#1a1a2e"/></svg>
+          </div>
+        </div>
+        <div class="dynamic-island"></div>
+
+        <div class="nav-bar">
+          <button class="nav-back" aria-label="Back">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="nav-title">My journeys</span>
+          <div class="nav-right"><span class="dsb-logo">DSB</span></div>
+        </div>
+
+        <div class="phone-content">
+
+          <!-- Hero -->
+          <div class="hero-card hero-card-s2">
+            <div class="check-icon">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="hero-eyebrow">Trip completed</div>
+            <div class="hero-heading">Thank you for<br>traveling with us</div>
+            <div class="hero-sub">Copenhagen → Odense · 5 May 2026</div>
+          </div>
+
+          <!-- Trip summary compact -->
+          <div class="trip-card">
+            <div class="trip-card-label">Journey summary</div>
+            <div class="trip-route">
+              <div class="route-point">
+                <div class="route-city">CPH</div>
+                <div class="route-time">07:32</div>
+              </div>
+              <div class="route-arrow">
+                <div class="route-line"></div>
+                <div class="route-duration">1h 15m · IC Train</div>
+              </div>
+              <div class="route-point" style="text-align:right">
+                <div class="route-city">ODN</div>
+                <div class="route-time">08:47</div>
+              </div>
+            </div>
+            <div class="trip-meta">
+              <div class="trip-meta-item">
+                <span class="trip-meta-label">Date</span>
+                <span class="trip-meta-value">5 May 2026</span>
+              </div>
+              <div class="trip-meta-item">
+                <span class="trip-meta-label">Class</span>
+                <span class="trip-meta-value">2nd class</span>
+              </div>
+              <div class="trip-meta-item">
+                <span class="trip-meta-label">Ticket</span>
+                <span class="trip-meta-value">Orange</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Points reward card -->
+          <div class="points-card">
+            <!-- "This trip" badge -->
+            <div class="this-trip-badge">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>+2 points earned on this trip</span>
+            </div>
+
+            <div class="points-card-inner">
+              <!-- Hand-drawn coffee cup illustration -->
+              <div class="points-illustration">
+                <svg class="illus-coffee" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- steam wisps -->
+                  <path d="M22 12 Q20 8 22 4" stroke="#2F4DB8" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.5"/>
+                  <path d="M30 11 Q28 6 30 2" stroke="#2F4DB8" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.5"/>
+                  <path d="M38 12 Q36 8 38 4" stroke="#2F4DB8" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.5"/>
+                  <!-- cup body – slightly wobbly hand-drawn feel -->
+                  <path d="M14 17 Q13.5 16 15 16 L47 16 Q48.5 16 48 17 L44 50 Q43.5 52 42 52 L20 52 Q18.5 52 18 50 Z" stroke="#2F4DB8" stroke-width="2" fill="#DDE7FF" stroke-linejoin="round"/>
+                  <!-- saucer -->
+                  <path d="M10 54 Q32 58 54 54" stroke="#2F4DB8" stroke-width="2" stroke-linecap="round" fill="none"/>
+                  <!-- handle -->
+                  <path d="M47 22 Q58 22 57 34 Q56 44 47 44" stroke="#2F4DB8" stroke-width="2" stroke-linecap="round" fill="none"/>
+                  <!-- coffee surface -->
+                  <ellipse cx="31" cy="20" rx="14" ry="3" fill="#2F4DB8" opacity="0.18"/>
+                  <!-- small heart/latte art -->
+                  <path d="M27 21 Q29 19 31 21 Q33 19 35 21 Q33 24 31 26 Q29 24 27 21Z" stroke="#2F4DB8" stroke-width="1" fill="#2F4DB8" opacity="0.25"/>
+                </svg>
+              </div>
+
+              <div class="points-text">
+                <div class="points-earned">You now have</div>
+                <div class="points-total">51 points</div>
+                <div class="points-reward-hint">Enough for a small filter coffee ☕</div>
+              </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="progress-wrap">
+              <div class="progress-labels">
+                <span class="progress-label">0 pts</span>
+                <span class="progress-label" style="font-weight:600;color:var(--color-primary);">51 / 100 pts</span>
+                <span class="progress-label">100 pts</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <div class="progress-milestones">
+                <div class="milestone">
+                  <div class="milestone-dot reached"></div>
+                  <div class="milestone-label">0<span>Start</span></div>
+                </div>
+                <div class="milestone">
+                  <div class="milestone-dot reached"></div>
+                  <div class="milestone-label">25<span style="font-family:var(--font-display);font-size:9px;color:var(--color-accent-brown);display:block;">Coffee</span></div>
+                </div>
+                <div class="milestone">
+                  <div class="milestone-dot reached"></div>
+                  <div class="milestone-label">50<span style="font-family:var(--font-display);font-size:9px;color:var(--color-accent-brown);display:block;">Pastry</span></div>
+                </div>
+                <div class="milestone">
+                  <div class="milestone-dot"></div>
+                  <div class="milestone-label">100<span style="font-family:var(--font-display);font-size:9px;color:var(--color-accent-brown);display:block;">Lunch</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="spacer"></div>
+
+          <button class="cta-btn cta-primary">View rewards</button>
+          <button class="cta-btn cta-secondary">Close</button>
+
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SCREEN 3 · Non-Plus upsell                 -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="phone-wrap">
+      <span class="screen-label">Screen 3 · Non-Plus user</span>
+      <div class="phone">
+        <div class="status-bar">
+          <span class="time">9:41</span>
+          <div class="status-icons">
+            <svg viewBox="0 0 24 24"><path d="M1 6C5.5 1.5 18.5 1.5 23 6M5 10c3.5-3.5 10.5-3.5 14 0M9 14c1.5-1.5 5.5-1.5 7 0M12 18h.01" stroke="#1a1a2e" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="16" height="10" rx="2" stroke="#1a1a2e" stroke-width="1.8" fill="none"/><path d="M18 11h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2" stroke="#1a1a2e" stroke-width="1.8" fill="none"/><rect x="4" y="9" width="10" height="6" rx="1" fill="#1a1a2e"/></svg>
+          </div>
+        </div>
+        <div class="dynamic-island"></div>
+
+        <div class="nav-bar">
+          <button class="nav-back" aria-label="Back">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <span class="nav-title">My journeys</span>
+          <div class="nav-right"><span class="dsb-logo">DSB</span></div>
+        </div>
+
+        <div class="phone-content">
+
+          <!-- Hero – same warmth, no points earned -->
+          <div class="hero-card">
+            <div class="check-icon">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="hero-eyebrow">Trip completed</div>
+            <div class="hero-heading">Thank you for<br>traveling with us</div>
+          </div>
+
+          <!-- Trip summary -->
+          <div class="trip-card">
+            <div class="trip-card-label">Journey summary</div>
+            <div class="trip-route">
+              <div class="route-point">
+                <div class="route-city">CPH</div>
+                <div class="route-time">07:32</div>
+              </div>
+              <div class="route-arrow">
+                <div class="route-line"></div>
+                <div class="route-duration">1h 15m · IC Train</div>
+              </div>
+              <div class="route-point" style="text-align:right">
+                <div class="route-city">ODN</div>
+                <div class="route-time">08:47</div>
+              </div>
+            </div>
+            <div class="trip-meta">
+              <div class="trip-meta-item">
+                <span class="trip-meta-label">Date</span>
+                <span class="trip-meta-value">5 May 2026</span>
+              </div>
+              <div class="trip-meta-item">
+                <span class="trip-meta-label">Class</span>
+                <span class="trip-meta-value">2nd class</span>
+              </div>
+              <div class="trip-meta-item">
+                <span class="trip-meta-label">Ticket</span>
+                <span class="trip-meta-value">Orange</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider-label"><span>DSB Plus</span></div>
+
+          <!-- Upsell card – calm, low-pressure -->
+          <div class="upsell-card">
+            <div class="upsell-top">
+              <!-- Hand-drawn star/points illustration -->
+              <div class="upsell-illustration">
+                <svg class="illus-star" width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Outer circle -->
+                  <circle cx="28" cy="28" r="24" stroke="#2F4DB8" stroke-width="1.8" stroke-dasharray="3 2" opacity="0.3"/>
+                  <!-- Inner circle -->
+                  <circle cx="28" cy="28" r="18" stroke="#2F4DB8" stroke-width="1.5" fill="#DDE7FF" opacity="0.6"/>
+                  <!-- Hand-drawn star -->
+                  <path d="M28 14 L30.9 22.6 L40 22.6 L32.6 27.8 L35.5 36.4 L28 31.2 L20.5 36.4 L23.4 27.8 L16 22.6 L25.1 22.6 Z"
+                    stroke="#2F4DB8" stroke-width="1.8" stroke-linejoin="round"
+                    fill="#2F4DB8" fill-opacity="0.18"/>
+                  <!-- small sparkles -->
+                  <path d="M42 12 L43 15 L46 12 L43 9 Z" stroke="#2F4DB8" stroke-width="1.2" stroke-linejoin="round" fill="none" opacity="0.5"/>
+                  <path d="M10 38 L11 41 L14 38 L11 35 Z" stroke="#2F4DB8" stroke-width="1.2" stroke-linejoin="round" fill="none" opacity="0.5"/>
+                  <circle cx="44" cy="34" r="2" stroke="#2F4DB8" stroke-width="1.2" fill="none" opacity="0.4"/>
+                  <circle cx="12" cy="18" r="1.5" stroke="#2F4DB8" stroke-width="1.2" fill="none" opacity="0.4"/>
+                </svg>
+              </div>
+
+              <div class="upsell-text-block">
+                <div class="upsell-eyebrow">Did you know?</div>
+                <div class="upsell-heading">You could have earned points on this trip</div>
+              </div>
+            </div>
+
+            <div class="upsell-divider"></div>
+
+            <!-- DSB Plus badge -->
+            <div>
+              <div class="dsb-plus-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2F4DB8" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l2.9 8.6H23l-7.3 5.3 2.8 8.6L12 19.2 4.5 24.5l2.8-8.6L1 10.6h8.1z"/></svg>
+                <span>DSB Plus</span>
+              </div>
+              <div class="upsell-body">Activate DSB Plus to collect points on every journey and redeem them for food and drinks on board.</div>
+            </div>
+          </div>
+
+          <div class="spacer"></div>
+
+          <button class="cta-btn cta-primary">Activate points</button>
+          <button class="cta-btn cta-secondary" style="font-size:14px;">Not now</button>
+
+        </div>
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+
+  </div><!-- /screens-row -->
+
+  <!-- Legend -->
+  <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#888;font-family:'IBM Plex Sans',sans-serif;">
+      <div style="width:12px;height:12px;border-radius:3px;background:#F2C94C;"></div>
+      Annotation callout – UX problem identified
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#888;font-family:'IBM Plex Sans',sans-serif;">
+      <div style="width:12px;height:12px;border-radius:3px;background:#DDE7FF;"></div>
+      Points reward card – DSB Plus member
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#888;font-family:'IBM Plex Sans',sans-serif;">
+      <div style="width:12px;height:12px;border-radius:3px;background:#FFFFFF;border:1px solid #e8e5dc;"></div>
+      Upsell card – Non-Plus user · low-pressure
+    </div>
+  </div>
+
+</body>
+</html>
