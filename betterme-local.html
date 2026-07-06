@@ -10,6 +10,7 @@
     --cream: #F6F1E7;
     --card: #FFFFFF;
     --ink: #221E19;
+    --pose-ink: var(--ink);
     --muted: #8C8271;
     --line: #E4DCC9;
     --accent-dark: #201C17;
@@ -297,7 +298,7 @@
   .exercise-row .dur { font-size: 11.5px; color: var(--muted); }
 
   /* Player */
-  .player { background: var(--ink); color: #fff; height: 100%; display: flex; flex-direction: column; }
+  .player { background: var(--ink); color: #fff; height: 100%; display: flex; flex-direction: column; --pose-ink: var(--cream); }
   .player .ptop { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 8px; }
   .player .close-btn {
     width: 32px; height: 32px; border-radius: 50%; border: none;
@@ -535,78 +536,111 @@
   /* ---------------- Exercise & workout library ---------------- */
 
   var CAT_CLASS = { Pilates: "Pilates", Calisthenics: "Calisthenics", "Chair Yoga": "ChairYoga" };
-  var CAT_COLOR = { Pilates: "var(--pilates-fg)", Calisthenics: "var(--cali-fg)", "Chair Yoga": "var(--yoga-fg)" };
+  var CAT_TOP = { Pilates: "var(--pilates-fg)", Calisthenics: "var(--cali-fg)", "Chair Yoga": "var(--yoga-fg)" };
+  var CAT_SOFT = { Pilates: "var(--pilates-bg)", Calisthenics: "var(--cali-bg)", "Chair Yoga": "var(--yoga-bg)" };
   var CAT_HERO_POSE = { Pilates: "flex", Calisthenics: "fullbody", "Chair Yoga": "rest" };
   var ZONE_POSE = { Legs: "legs", Arms: "arms", Core: "core", "Full Body": "fullbody", Flexibility: "flex" };
 
-  /* Small flat line-art figures, built from primitives so every pose reuses
-     the app's existing palette instead of introducing new illustration colors. */
-  function poseHead(cx, cy, r) {
-    return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="var(--cream)" stroke="var(--ink)" stroke-width="3"/>';
+  /* Small illustrated character (face, hair, filled outlined limbs, shoes) built
+     from primitives so every pose reuses the app's existing palette — "top" is
+     the shirt color, "soft" is the leggings/shorts tint, both already defined
+     per category above. No new illustration colors are introduced. */
+  function capsule(x1, y1, x2, y2, w, fill) {
+    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="var(--pose-ink)" stroke-width="' + (w + 4) + '" stroke-linecap="round"/>' +
+      '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + fill + '" stroke-width="' + w + '" stroke-linecap="round"/>';
   }
-  function poseLimb(x1, y1, x2, y2, w) {
-    return '<path d="M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2 + '" stroke="var(--muted)" stroke-width="' + w + '" stroke-linecap="round"/>';
+  function poseHead(cx, cy, r) {
+    return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="var(--cream)" stroke="var(--pose-ink)" stroke-width="3"/>';
+  }
+  function poseHair(cx, cy, r) {
+    return '<path d="M' + (cx - r * 1.05) + ' ' + (cy - r * 0.1) + ' Q' + (cx - r * 1.15) + ' ' + (cy - r * 1.35) + ' ' + cx + ' ' + (cy - r * 1.4) +
+      ' Q' + (cx + r * 1.15) + ' ' + (cy - r * 1.35) + ' ' + (cx + r * 1.05) + ' ' + (cy - r * 0.1) +
+      ' Q' + (cx + r * 0.85) + ' ' + (cy - r * 0.55) + ' ' + cx + ' ' + (cy - r * 0.6) +
+      ' Q' + (cx - r * 0.85) + ' ' + (cy - r * 0.55) + ' ' + (cx - r * 1.05) + ' ' + (cy - r * 0.1) + ' Z" fill="var(--pose-ink)"/>';
+  }
+  function poseFace(cx, cy, r) {
+    var ex = r * 0.38;
+    return '<circle cx="' + (cx - ex) + '" cy="' + cy + '" r="1.4" fill="var(--pose-ink)"/>' +
+      '<circle cx="' + (cx + ex) + '" cy="' + cy + '" r="1.4" fill="var(--pose-ink)"/>' +
+      '<path d="M' + (cx - r * 0.3) + ' ' + (cy + r * 0.4) + ' Q' + cx + ' ' + (cy + r * 0.62) + ' ' + (cx + r * 0.3) + ' ' + (cy + r * 0.4) + '" stroke="var(--pose-ink)" stroke-width="1.6" fill="none" stroke-linecap="round"/>';
   }
   function poseTorso(x, y, w, h, rx, fill, rot, rcx, rcy) {
     var t = rot ? ' transform="rotate(' + rot + ' ' + rcx + ' ' + rcy + ')"' : "";
-    return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + rx + '" fill="' + fill + '"' + t + "/>";
+    return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + rx + '" fill="' + fill + '" stroke="var(--pose-ink)" stroke-width="2.5"' + t + "/>";
+  }
+  function poseShoe(cx, cy, angle) {
+    return '<g transform="rotate(' + angle + ' ' + cx + ' ' + cy + ')">' +
+      '<rect x="' + (cx - 8) + '" y="' + (cy - 5) + '" width="18" height="10" rx="5" fill="var(--pose-ink)"/>' +
+      '<rect x="' + (cx - 7) + '" y="' + (cy + 2) + '" width="16" height="3" rx="1.5" fill="var(--cream)"/>' +
+      "</g>";
+  }
+  function poseHand(cx, cy) {
+    return '<circle cx="' + cx + '" cy="' + cy + '" r="5.5" fill="var(--cream)" stroke="var(--pose-ink)" stroke-width="2.5"/>';
   }
 
   var POSES = {
-    flex: function (c) {
-      return poseLimb(46, 58, 43, 90, 9) +
-        poseLimb(54, 58, 66, 64, 8) + poseLimb(66, 64, 58, 78, 8) +
-        poseTorso(40, 32, 20, 28, 10, c, -6, 50, 46) +
-        poseLimb(42, 36, 30, 14, 7) +
-        poseLimb(58, 38, 71, 48, 7) +
-        poseHead(48, 20, 10);
+    flex: function (top, soft) {
+      return capsule(46, 60, 42, 92, 11, soft) +
+        capsule(54, 60, 68, 66, 10, soft) + capsule(68, 66, 58, 80, 10, soft) +
+        poseShoe(42, 94, -8) + poseShoe(58, 82, 25) +
+        poseTorso(39, 34, 22, 30, 11, top, -5, 50, 49) +
+        capsule(42, 38, 30, 16, 8, "var(--cream)") + poseHand(29, 15) +
+        capsule(58, 40, 72, 50, 8, "var(--cream)") + poseHand(73, 51) +
+        poseHair(48, 20, 11) + poseHead(48, 20, 11) + poseFace(48, 20, 11);
     },
-    legs: function (c) {
-      return poseLimb(43, 58, 37, 76, 8) + poseLimb(37, 76, 42, 92, 8) +
-        poseLimb(57, 58, 63, 76, 8) + poseLimb(63, 76, 58, 92, 8) +
-        poseLimb(41, 40, 24, 46, 7) + poseLimb(59, 40, 76, 46, 7) +
-        poseTorso(40, 34, 20, 26, 9, c, 0, 50, 47) +
-        poseHead(50, 24, 10);
+    legs: function (top, soft) {
+      return capsule(43, 58, 36, 78, 9, soft) + capsule(36, 78, 41, 94, 9, soft) +
+        capsule(57, 58, 64, 78, 9, soft) + capsule(64, 78, 59, 94, 9, soft) +
+        poseShoe(41, 95, 0) + poseShoe(59, 95, 0) +
+        capsule(41, 40, 23, 46, 8, "var(--cream)") + poseHand(21, 47) +
+        capsule(59, 40, 77, 46, 8, "var(--cream)") + poseHand(79, 47) +
+        poseTorso(39, 32, 22, 30, 10, top, 0, 50, 47) +
+        poseHair(50, 20, 11) + poseHead(50, 20, 11) + poseFace(50, 20, 11);
     },
-    arms: function (c) {
-      return poseLimb(45, 62, 43, 90, 8) + poseLimb(55, 62, 57, 90, 8) +
-        poseLimb(40, 38, 29, 50, 7) + poseLimb(29, 50, 38, 36, 7) +
-        poseLimb(60, 38, 71, 50, 7) + poseLimb(71, 50, 62, 36, 7) +
-        poseTorso(41, 34, 18, 28, 9, c, 0, 50, 48) +
-        poseHead(50, 24, 10);
+    arms: function (top, soft) {
+      return capsule(45, 62, 42, 92, 9, soft) + poseShoe(42, 94, 0) +
+        capsule(55, 62, 58, 92, 9, soft) + poseShoe(58, 94, 0) +
+        capsule(39, 38, 27, 52, 8, "var(--cream)") + capsule(27, 52, 37, 36, 8, "var(--cream)") + poseHand(37, 36) +
+        capsule(61, 38, 73, 52, 8, "var(--cream)") + capsule(73, 52, 63, 36, 8, "var(--cream)") + poseHand(63, 36) +
+        poseTorso(39, 32, 22, 30, 10, top, 0, 50, 47) +
+        poseHair(50, 20, 11) + poseHead(50, 20, 11) + poseFace(50, 20, 11);
     },
-    core: function (c) {
-      return poseLimb(50, 66, 64, 58, 8) + poseLimb(64, 58, 74, 68, 8) +
-        poseLimb(48, 66, 58, 60, 8) + poseLimb(58, 60, 50, 50, 7) +
-        poseTorso(35, 38, 18, 26, 9, c, 24, 44, 50) +
-        poseHead(38, 26, 9);
+    core: function (top, soft) {
+      return capsule(52, 68, 68, 62, 9, soft) + capsule(68, 62, 78, 74, 9, soft) + poseShoe(80, 75, 60) +
+        capsule(50, 68, 60, 64, 9, soft) + capsule(60, 64, 52, 54, 9, soft) + poseShoe(52, 54, -40) +
+        capsule(40, 52, 30, 66, 8, "var(--cream)") + poseHand(28, 68) +
+        poseTorso(34, 36, 20, 28, 10, top, 26, 44, 50) +
+        poseHair(38, 26, 10) + poseHead(38, 26, 10) + poseFace(38, 26, 10);
     },
-    fullbody: function (c) {
-      return poseLimb(50, 58, 30, 80, 8) + poseLimb(50, 58, 70, 80, 8) +
-        poseLimb(44, 36, 22, 16, 7) + poseLimb(56, 36, 78, 16, 7) +
-        poseTorso(41, 32, 18, 28, 9, c, 0, 50, 46) +
-        poseHead(50, 20, 10);
+    fullbody: function (top, soft) {
+      return capsule(50, 60, 28, 84, 9, soft) + poseShoe(26, 86, -30) +
+        capsule(50, 60, 72, 84, 9, soft) + poseShoe(74, 86, 30) +
+        capsule(44, 38, 20, 16, 8, "var(--cream)") + poseHand(18, 14) +
+        capsule(56, 38, 80, 16, 8, "var(--cream)") + poseHand(82, 14) +
+        poseTorso(40, 32, 20, 28, 10, top, 0, 50, 46) +
+        poseHair(50, 20, 11) + poseHead(50, 20, 11) + poseFace(50, 20, 11);
     },
-    rest: function (c) {
-      return poseLimb(42, 64, 26, 58, 8) + poseLimb(58, 64, 74, 58, 8) +
-        poseTorso(39, 36, 22, 30, 11, c, 0, 50, 50) +
-        '<ellipse cx="50" cy="80" rx="26" ry="8" fill="' + c + '" opacity="0.55"/>' +
-        poseHead(50, 26, 10);
+    rest: function (top, soft) {
+      return '<ellipse cx="50" cy="82" rx="28" ry="9" fill="' + soft + '" stroke="var(--pose-ink)" stroke-width="2.5"/>' +
+        capsule(40, 66, 24, 60, 9, soft) + poseHand(22, 59) +
+        capsule(60, 66, 76, 60, 9, soft) + poseHand(78, 59) +
+        poseTorso(38, 36, 24, 32, 12, top, 0, 50, 52) +
+        poseHair(50, 26, 11) + poseHead(50, 26, 11) + poseFace(50, 26, 11);
     }
   };
 
-  function poseIconHTML(poseName, colorVar, sizePx) {
+  function poseIconHTML(poseName, topColor, softColor, sizePx) {
     return '<div style="width:' + sizePx + 'px; height:' + sizePx + 'px;">' +
-      '<svg viewBox="0 0 100 100" width="100%" height="100%">' + POSES[poseName](colorVar) + "</svg>" +
+      '<svg viewBox="0 0 100 100" width="100%" height="100%">' + POSES[poseName](topColor, softColor) + "</svg>" +
       "</div>";
   }
 
   function categoryIconHTML(category, sizePx) {
-    return poseIconHTML(CAT_HERO_POSE[category], CAT_COLOR[category], sizePx);
+    return poseIconHTML(CAT_HERO_POSE[category], CAT_TOP[category], CAT_SOFT[category], sizePx);
   }
 
   function zoneIconHTML(zone, category, sizePx) {
-    return poseIconHTML(ZONE_POSE[zone], CAT_COLOR[category], sizePx);
+    return poseIconHTML(ZONE_POSE[zone], CAT_TOP[category], CAT_SOFT[category], sizePx);
   }
 
   var EXERCISES = {
@@ -902,7 +936,7 @@
     if (entry.type === "rest") {
       html += '<div class="today-card">' +
         '<span class="zone-chip RestDay">REST DAY</span>' +
-        '<div class="today-illustration RestDay">' + poseIconHTML("rest", "var(--muted)", 72) + "</div>" +
+        '<div class="today-illustration RestDay">' + poseIconHTML("rest", "var(--muted)", "var(--line)", 72) + "</div>" +
         '<div class="today-title">Recovery day</div>' +
         '<div class="today-meta">No workout scheduled. Stretch, hydrate, and come back tomorrow.</div>' +
         '<button class="btn-secondary" onclick="markRestDone(' + idx + ')">Mark as done</button>' +
@@ -1099,7 +1133,7 @@
     var isRest = step.kind === "rest";
 
     document.getElementById("player-emoji").innerHTML = isRest
-      ? poseIconHTML("rest", CAT_COLOR[ex.category], 96)
+      ? poseIconHTML("rest", CAT_TOP[ex.category], CAT_SOFT[ex.category], 96)
       : zoneIconHTML(ex.zone, ex.category, 96);
     document.getElementById("player-state").textContent = isRest ? "Rest" : ex.zone;
     document.getElementById("player-name").textContent = isRest ? "Get ready" : ex.name;
