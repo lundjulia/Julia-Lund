@@ -187,6 +187,7 @@
   .zone-chip.Pilates { background: var(--pilates-bg); color: var(--pilates-fg); }
   .zone-chip.Calisthenics { background: var(--cali-bg); color: var(--cali-fg); }
   .zone-chip.ChairYoga { background: var(--yoga-bg); color: var(--yoga-fg); }
+  .zone-chip.RestDay { background: var(--line); color: var(--muted); }
   .today-illustration {
     width: 100%;
     height: 130px;
@@ -199,6 +200,7 @@
   .today-illustration.Pilates { background: var(--pilates-bg); }
   .today-illustration.Calisthenics { background: var(--cali-bg); }
   .today-illustration.ChairYoga { background: var(--yoga-bg); }
+  .today-illustration.RestDay { background: var(--line); }
   .today-title { font-size: 18px; font-weight: 700; letter-spacing: -0.2px; }
   .today-meta { font-size: 12.5px; color: var(--muted); }
 
@@ -532,9 +534,80 @@
 
   /* ---------------- Exercise & workout library ---------------- */
 
-  var ZONE_EMOJI = { Legs: "🦵", Arms: "💪", Core: "🔥", "Full Body": "⚡", Flexibility: "🌿" };
   var CAT_CLASS = { Pilates: "Pilates", Calisthenics: "Calisthenics", "Chair Yoga": "ChairYoga" };
-  var CAT_EMOJI = { Pilates: "🧘‍♀️", Calisthenics: "🤸", "Chair Yoga": "🪑" };
+  var CAT_COLOR = { Pilates: "var(--pilates-fg)", Calisthenics: "var(--cali-fg)", "Chair Yoga": "var(--yoga-fg)" };
+  var CAT_HERO_POSE = { Pilates: "flex", Calisthenics: "fullbody", "Chair Yoga": "rest" };
+  var ZONE_POSE = { Legs: "legs", Arms: "arms", Core: "core", "Full Body": "fullbody", Flexibility: "flex" };
+
+  /* Small flat line-art figures, built from primitives so every pose reuses
+     the app's existing palette instead of introducing new illustration colors. */
+  function poseHead(cx, cy, r) {
+    return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="var(--cream)" stroke="var(--ink)" stroke-width="3"/>';
+  }
+  function poseLimb(x1, y1, x2, y2, w) {
+    return '<path d="M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2 + '" stroke="var(--muted)" stroke-width="' + w + '" stroke-linecap="round"/>';
+  }
+  function poseTorso(x, y, w, h, rx, fill, rot, rcx, rcy) {
+    var t = rot ? ' transform="rotate(' + rot + ' ' + rcx + ' ' + rcy + ')"' : "";
+    return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + rx + '" fill="' + fill + '"' + t + "/>";
+  }
+
+  var POSES = {
+    flex: function (c) {
+      return poseLimb(46, 58, 43, 90, 9) +
+        poseLimb(54, 58, 66, 64, 8) + poseLimb(66, 64, 58, 78, 8) +
+        poseTorso(40, 32, 20, 28, 10, c, -6, 50, 46) +
+        poseLimb(42, 36, 30, 14, 7) +
+        poseLimb(58, 38, 71, 48, 7) +
+        poseHead(48, 20, 10);
+    },
+    legs: function (c) {
+      return poseLimb(43, 58, 37, 76, 8) + poseLimb(37, 76, 42, 92, 8) +
+        poseLimb(57, 58, 63, 76, 8) + poseLimb(63, 76, 58, 92, 8) +
+        poseLimb(41, 40, 24, 46, 7) + poseLimb(59, 40, 76, 46, 7) +
+        poseTorso(40, 34, 20, 26, 9, c, 0, 50, 47) +
+        poseHead(50, 24, 10);
+    },
+    arms: function (c) {
+      return poseLimb(45, 62, 43, 90, 8) + poseLimb(55, 62, 57, 90, 8) +
+        poseLimb(40, 38, 29, 50, 7) + poseLimb(29, 50, 38, 36, 7) +
+        poseLimb(60, 38, 71, 50, 7) + poseLimb(71, 50, 62, 36, 7) +
+        poseTorso(41, 34, 18, 28, 9, c, 0, 50, 48) +
+        poseHead(50, 24, 10);
+    },
+    core: function (c) {
+      return poseLimb(50, 66, 64, 58, 8) + poseLimb(64, 58, 74, 68, 8) +
+        poseLimb(48, 66, 58, 60, 8) + poseLimb(58, 60, 50, 50, 7) +
+        poseTorso(35, 38, 18, 26, 9, c, 24, 44, 50) +
+        poseHead(38, 26, 9);
+    },
+    fullbody: function (c) {
+      return poseLimb(50, 58, 30, 80, 8) + poseLimb(50, 58, 70, 80, 8) +
+        poseLimb(44, 36, 22, 16, 7) + poseLimb(56, 36, 78, 16, 7) +
+        poseTorso(41, 32, 18, 28, 9, c, 0, 50, 46) +
+        poseHead(50, 20, 10);
+    },
+    rest: function (c) {
+      return poseLimb(42, 64, 26, 58, 8) + poseLimb(58, 64, 74, 58, 8) +
+        poseTorso(39, 36, 22, 30, 11, c, 0, 50, 50) +
+        '<ellipse cx="50" cy="80" rx="26" ry="8" fill="' + c + '" opacity="0.55"/>' +
+        poseHead(50, 26, 10);
+    }
+  };
+
+  function poseIconHTML(poseName, colorVar, sizePx) {
+    return '<div style="width:' + sizePx + 'px; height:' + sizePx + 'px;">' +
+      '<svg viewBox="0 0 100 100" width="100%" height="100%">' + POSES[poseName](colorVar) + "</svg>" +
+      "</div>";
+  }
+
+  function categoryIconHTML(category, sizePx) {
+    return poseIconHTML(CAT_HERO_POSE[category], CAT_COLOR[category], sizePx);
+  }
+
+  function zoneIconHTML(zone, category, sizePx) {
+    return poseIconHTML(ZONE_POSE[zone], CAT_COLOR[category], sizePx);
+  }
 
   var EXERCISES = {
     roll_up: { name: "Pilates Roll-Up", category: "Pilates", zone: "Core", work: 30, rest: 15, cal: 5 },
@@ -828,8 +901,8 @@
     var html = "";
     if (entry.type === "rest") {
       html += '<div class="today-card">' +
-        '<span class="zone-chip ChairYoga">REST DAY</span>' +
-        '<div class="today-illustration ChairYoga">😌</div>' +
+        '<span class="zone-chip RestDay">REST DAY</span>' +
+        '<div class="today-illustration RestDay">' + poseIconHTML("rest", "var(--muted)", 72) + "</div>" +
         '<div class="today-title">Recovery day</div>' +
         '<div class="today-meta">No workout scheduled. Stretch, hydrate, and come back tomorrow.</div>' +
         '<button class="btn-secondary" onclick="markRestDone(' + idx + ')">Mark as done</button>' +
@@ -840,7 +913,7 @@
       var catClass = CAT_CLASS[w.category];
       html += '<div class="today-card">' +
         '<span class="zone-chip ' + catClass + '">' + w.zone.toUpperCase() + "</span>" +
-        '<div class="today-illustration ' + catClass + '">' + CAT_EMOJI[w.category] + "</div>" +
+        '<div class="today-illustration ' + catClass + '">' + categoryIconHTML(w.category, 72) + "</div>" +
         '<div class="today-title">' + w.name + "</div>" +
         '<div class="today-meta">' + summary.minutes + " Min &middot; " + summary.calories + " Cal &middot; " + w.category + "</div>" +
         '<button class="btn-primary" onclick="openDetail(\'' + entry.workoutId + "', " + idx + ')">Start Workout</button>' +
@@ -908,7 +981,7 @@
       var card = document.createElement("div");
       card.className = "workout-card";
       card.innerHTML =
-        '<div class="ic ' + CAT_CLASS[w.category] + '">' + CAT_EMOJI[w.category] + "</div>" +
+        '<div class="ic ' + CAT_CLASS[w.category] + '">' + categoryIconHTML(w.category, 32) + "</div>" +
         '<div class="info"><div class="n">' + w.name + '</div><div class="m">' + summary.minutes + " Min &middot; " + summary.calories + " Cal &middot; " + w.zone + "</div></div>" +
         '<div class="chev">›</div>';
       card.onclick = function () { openDetail(id, null); };
@@ -929,7 +1002,7 @@
     var catClass = CAT_CLASS[w.category];
 
     document.getElementById("detail-illustration").className = "detail-illustration " + catClass;
-    document.getElementById("detail-illustration").textContent = CAT_EMOJI[w.category];
+    document.getElementById("detail-illustration").innerHTML = categoryIconHTML(w.category, 120);
     document.getElementById("detail-chip").className = "zone-chip " + catClass;
     document.getElementById("detail-chip").textContent = w.zone.toUpperCase();
     document.getElementById("detail-title").textContent = w.name;
@@ -940,7 +1013,7 @@
     summary.exercises.forEach(function (e) {
       var row = document.createElement("div");
       row.className = "exercise-row";
-      row.innerHTML = '<div class="e">' + ZONE_EMOJI[e.zone] + '</div><div class="name">' + e.name + '</div><div class="dur">' + e.work + "s</div>";
+      row.innerHTML = '<div class="e">' + zoneIconHTML(e.zone, e.category, 26) + '</div><div class="name">' + e.name + '</div><div class="dur">' + e.work + "s</div>";
       list.appendChild(row);
     });
 
@@ -1025,7 +1098,9 @@
     var ex = player.exercises[step.exIndex];
     var isRest = step.kind === "rest";
 
-    document.getElementById("player-emoji").textContent = isRest ? "⏱️" : ZONE_EMOJI[ex.zone];
+    document.getElementById("player-emoji").innerHTML = isRest
+      ? poseIconHTML("rest", CAT_COLOR[ex.category], 96)
+      : zoneIconHTML(ex.zone, ex.category, 96);
     document.getElementById("player-state").textContent = isRest ? "Rest" : ex.zone;
     document.getElementById("player-name").textContent = isRest ? "Get ready" : ex.name;
     document.getElementById("player-timer").textContent = fmtClock(player.secondsLeft);
@@ -1034,14 +1109,12 @@
     document.getElementById("player-playbtn").textContent = player.running ? "Pause" : "Resume";
 
     var nextEl = document.getElementById("player-next");
-    var nextExIndex = isRest ? step.exIndex + 1 : step.exIndex + (player.stepIndex + 1 < player.steps.length && player.steps[player.stepIndex + 1].kind === "rest" ? 0 : 1);
     var upcoming = null;
     for (var i = player.stepIndex + 1; i < player.steps.length; i++) {
       if (player.steps[i].kind === "work") { upcoming = player.exercises[player.steps[i].exIndex]; break; }
     }
     if (upcoming) {
-      nextEl.style.visibility = "visible";
-      nextEl.innerHTML = '<div class="e">' + ZONE_EMOJI[upcoming.zone] + '</div><div><div class="t">UP NEXT</div><div class="n">' + upcoming.name + "</div></div>";
+      nextEl.innerHTML = '<div class="e">' + zoneIconHTML(upcoming.zone, upcoming.category, 22) + '</div><div><div class="t">UP NEXT</div><div class="n">' + upcoming.name + "</div></div>";
     } else {
       nextEl.innerHTML = '<div class="e">🏁</div><div><div class="t">UP NEXT</div><div class="n">Final stretch</div></div>';
     }
