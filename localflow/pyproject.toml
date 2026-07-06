@@ -1,0 +1,8 @@
+[project]
+name = "localflow"
+version = "0.1.0"
+description = "Private, fully local voice dictation for macOS"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
