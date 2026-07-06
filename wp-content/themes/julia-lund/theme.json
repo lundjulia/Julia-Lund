@@ -16,12 +16,21 @@
 			"defaultPalette": false,
 			"defaultGradients": false,
 			"palette": [
-				{ "slug": "paper", "name": "Papir", "color": "#faf8f4" },
-				{ "slug": "sand", "name": "Sand", "color": "#f1ece3" },
-				{ "slug": "ink", "name": "Blæk", "color": "#1b1917" },
-				{ "slug": "stone", "name": "Sten", "color": "#6b6560" },
-				{ "slug": "line", "name": "Streg", "color": "#e2ddd3" },
-				{ "slug": "clay", "name": "Ler", "color": "#b5573a" }
+				{ "slug": "paper", "name": "Papir", "color": "#f1f0ee" },
+				{ "slug": "sand", "name": "Sand", "color": "#e7e4df" },
+				{ "slug": "ink", "name": "Blæk", "color": "#16140f" },
+				{ "slug": "stone", "name": "Sten", "color": "#6d6a65" },
+				{ "slug": "line", "name": "Streg", "color": "#dcd9d3" },
+				{ "slug": "clay", "name": "Ler", "color": "#a34a30" },
+				{ "slug": "plum", "name": "Blomme", "color": "#6b3a56" },
+				{ "slug": "gold", "name": "Guld", "color": "#d9a94e" }
+			],
+			"gradients": [
+				{
+					"slug": "editorial-bloom",
+					"name": "Editorial Bloom",
+					"gradient": "radial-gradient(circle at 30% 35%, #d9a94e 0%, #a34a30 38%, #6b3a56 66%, transparent 82%)"
+				}
 			]
 		},
 		"typography": {
@@ -32,8 +41,8 @@
 			"fontFamilies": [
 				{
 					"slug": "display",
-					"name": "Serif (Display)",
-					"fontFamily": "ui-serif, Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif"
+					"name": "Serif (Editorial)",
+					"fontFamily": "Didot, 'Bodoni MT', ui-serif, Georgia, 'Times New Roman', serif"
 				},
 				{
 					"slug": "body",
@@ -97,10 +106,10 @@
 		"elements": {
 			"heading": {
 				"typography": {
-					"fontFamily": "var(--wp--preset--font-family--display)",
-					"fontWeight": "400",
-					"lineHeight": "1.15",
-					"letterSpacing": "-0.01em"
+					"fontFamily": "var(--wp--preset--font-family--body)",
+					"fontWeight": "600",
+					"lineHeight": "1.1",
+					"letterSpacing": "-0.02em"
 				},
 				"color": { "text": "var(--wp--preset--color--ink)" }
 			},
@@ -147,10 +156,19 @@
 		"blocks": {
 			"core/site-title": {
 				"typography": {
-					"fontFamily": "var(--wp--preset--font-family--display)",
+					"fontFamily": "var(--wp--preset--font-family--body)",
+					"fontWeight": "700",
 					"fontSize": "var(--wp--preset--font-size--large)",
-					"letterSpacing": "0.01em"
+					"letterSpacing": "-0.01em"
 				}
+			},
+			"core/site-tagline": {
+				"typography": {
+					"fontSize": "0.75rem",
+					"textTransform": "uppercase",
+					"letterSpacing": "0.1em"
+				},
+				"color": { "text": "var(--wp--preset--color--stone)" }
 			},
 			"core/navigation": {
 				"typography": {

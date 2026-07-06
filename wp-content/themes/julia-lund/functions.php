@@ -145,6 +145,18 @@ function julia_lund_seed_case_categories() {
 add_action( 'after_switch_theme', 'julia_lund_seed_case_categories' );
 
 /**
+ * Give the site tagline a sensible starting value (shown next to the
+ * site title in the header via the Site Tagline block) instead of
+ * WordPress' generic default.
+ */
+function julia_lund_seed_tagline() {
+	if ( in_array( get_option( 'blogdescription' ), array( '', 'Just another WordPress site' ), true ) ) {
+		update_option( 'blogdescription', __( 'UX/UI & Brand Designer', 'julia-lund' ) );
+	}
+}
+add_action( 'after_switch_theme', 'julia_lund_seed_tagline' );
+
+/**
  * Register block pattern category so all theme patterns are grouped
  * together in the pattern inserter instead of scattered under "Uncategorized".
  */
