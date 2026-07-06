@@ -71,6 +71,23 @@ See `localflow/recorder.py`, `transcriber.py`, `cleanup.py`, `inject.py`,
    A 🎤 icon appears in the menu bar. Hold the **right Option key**, speak,
    and release — the transcribed, polished text is pasted at your cursor.
 
+## Building a standalone .app
+
+Running `python -m localflow.app` from a terminal works fine for daily use,
+but if you'd rather have a double-clickable app (e.g. to add to Login
+Items), build one with `py2app`:
+
+```bash
+pip install py2app
+python setup.py py2app
+open dist/localflow.app
+```
+
+The bundle sets `LSUIElement` so it runs as a menu-bar-only app with no
+Dock icon, and declares `NSMicrophoneUsageDescription` so macOS shows a
+sensible reason when prompting for mic access. You'll still need to grant
+Accessibility permission to `dist/localflow.app` the first time you run it.
+
 ## Configuration
 
 Settings persist to `~/.config/localflow/config.json` (created on first

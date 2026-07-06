@@ -1,6 +1,6 @@
 import requests
 
-from localflow.cleanup import polish, strip_fillers
+from localflow.cleanup import ollama_available, polish, strip_fillers
 from localflow.config import Config
 
 
@@ -75,3 +75,27 @@ def test_polish_falls_back_to_baseline_on_empty_ollama_response(monkeypatch):
     )
 
     assert polish("um hello there", config) == "Hello there"
+
+
+def test_ollama_available_true_when_reachable(monkeypatch):
+    config = Config()
+
+    class OkResponse:
+        ok = True
+
+    monkeypatch.setattr(
+        "localflow.cleanup.requests.get", lambda *a, **k: OkResponse()
+    )
+
+    assert ollama_available(config) is True
+
+
+def test_ollama_available_false_on_connection_error(monkeypatch):
+    config = Config()
+
+    def raise_connection_error(*args, **kwargs):
+        raise requests.ConnectionError("ollama is not running")
+
+    monkeypatch.setattr("localflow.cleanup.requests.get", raise_connection_error)
+
+    assert ollama_available(config) is False

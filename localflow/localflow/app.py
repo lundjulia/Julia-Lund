@@ -9,7 +9,7 @@ import threading
 
 import rumps
 
-from localflow.cleanup import polish
+from localflow.cleanup import ollama_available, polish
 from localflow.config import Config
 from localflow.hotkey import HotkeyListener
 from localflow.inject import inject_text
@@ -19,6 +19,8 @@ from localflow.transcriber import Transcriber
 IDLE_TITLE = "🎤"
 RECORDING_TITLE = "🔴 REC"
 BUSY_TITLE = "⏳"
+
+STATUS_REFRESH_SECONDS = 15
 
 
 class LocalFlowApp(rumps.App):
@@ -32,10 +34,14 @@ class LocalFlowApp(rumps.App):
             "Cleanup enabled", callback=self._toggle_cleanup
         )
         self.cleanup_item.state = self.config.cleanup_enabled
+        self.model_status_item = rumps.MenuItem(
+            f"Whisper model: loading {self.config.whisper_model}..."
+        )
+        self.ollama_status_item = rumps.MenuItem("Ollama: checking...")
         self.menu = [
             self.cleanup_item,
-            rumps.MenuItem(f"Whisper model: {self.config.whisper_model}"),
-            rumps.MenuItem(f"Ollama model: {self.config.ollama_model}"),
+            self.model_status_item,
+            self.ollama_status_item,
         ]
 
         self.hotkey = HotkeyListener(
@@ -43,14 +49,29 @@ class LocalFlowApp(rumps.App):
         )
 
         threading.Thread(target=self._load_model, daemon=True).start()
+        threading.Thread(target=self._refresh_ollama_status, daemon=True).start()
+        self._status_timer = rumps.Timer(
+            self._refresh_ollama_status, STATUS_REFRESH_SECONDS
+        )
+        self._status_timer.start()
 
     def _load_model(self) -> None:
         self._transcriber = Transcriber(self.config.whisper_model)
+        self.model_status_item.title = f"Whisper model: {self.config.whisper_model} (ready)"
+
+    def _refresh_ollama_status(self, _timer: rumps.Timer | None = None) -> None:
+        if not self.config.cleanup_enabled:
+            self.ollama_status_item.title = "Ollama: cleanup disabled"
+            return
+        reachable = ollama_available(self.config)
+        state = "connected" if reachable else "unreachable (using local fallback)"
+        self.ollama_status_item.title = f"Ollama: {state} ({self.config.ollama_model})"
 
     def _toggle_cleanup(self, sender: rumps.MenuItem) -> None:
         self.config.cleanup_enabled = not self.config.cleanup_enabled
         sender.state = self.config.cleanup_enabled
         self.config.save()
+        self._refresh_ollama_status()
 
     def _on_activate(self) -> None:
         if self._transcriber is None:

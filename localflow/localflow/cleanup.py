@@ -38,6 +38,15 @@ def strip_fillers(text: str) -> str:
     return cleaned
 
 
+def ollama_available(config: Config, timeout: float = 2.0) -> bool:
+    """Quick reachability check for the menu bar status item."""
+    try:
+        response = requests.get(f"{config.ollama_url}/api/tags", timeout=timeout)
+        return response.ok
+    except requests.RequestException:
+        return False
+
+
 def _query_ollama(text: str, config: Config, timeout: float = 15.0) -> str:
     response = requests.post(
         f"{config.ollama_url}/api/generate",
