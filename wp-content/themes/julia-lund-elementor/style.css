@@ -1,0 +1,276 @@
+/*
+Theme Name: Julia Lund — Portfolio (Elementor)
+Theme URI: https://example.com
+Author: Julia Lund
+Description: Letvægts, klassisk WordPress-tema bygget til at blive redigeret med Elementor. Leverer designtokens (farver, typografi, spacing), header/footer, og "Case"-indholdstypen — resten af siderne bygges med Elementor's egne widgets. Se ELEMENTOR-GUIDE.md for opskriften.
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 8.0
+Version: 1.0.0
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: julia-lund-elementor
+*/
+
+/* =====================================================================
+   Design tokens — identiske værdier til Elementor-temaets FSE-søskende
+   (wp-content/themes/julia-lund). Genbruges her som almindelige CSS
+   custom properties, og som reference for hvad du skal indtaste i
+   Elementor → Site Settings → Global Colors / Global Fonts.
+   ===================================================================== */
+:root {
+	--jl-paper: #f1f0ee;
+	--jl-ink: #16140f;
+	--jl-stone: #6d6a65;
+	--jl-sand: #e7e4df;
+	--jl-line: #dcd9d3;
+	--jl-clay: #a34a30;
+	--jl-plum: #6b3a56;
+	--jl-gold: #d9a94e;
+
+	--jl-font-display: Didot, 'Bodoni MT', ui-serif, Georgia, 'Times New Roman', serif;
+	--jl-font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+	--jl-section-gap: clamp(4rem, 3rem + 5vw, 8rem);
+	--jl-section-gap-sm: clamp(2.5rem, 2rem + 2vw, 4rem);
+	--jl-content-width: 42rem;
+	--jl-wide-width: 80rem;
+}
+
+/* =====================================================================
+   Reset + base
+   ===================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+	margin: 0;
+	background: var(--jl-paper);
+	color: var(--jl-ink);
+	font-family: var(--jl-font-body);
+	font-size: 1.0625rem;
+	line-height: 1.65;
+}
+img { max-width: 100%; height: auto; display: block; }
+h1, h2, h3, h4, h5, h6 {
+	font-family: var(--jl-font-body);
+	font-weight: 600;
+	line-height: 1.1;
+	letter-spacing: -0.02em;
+	text-wrap: balance;
+	margin: 0 0 0.5em;
+}
+h1 { font-size: clamp(2.75rem, 2rem + 4vw, 5.5rem); }
+h2 { font-size: clamp(2.25rem, 1.8rem + 2.2vw, 3.5rem); }
+h3 { font-size: clamp(1.75rem, 1.5rem + 1.2vw, 2.4rem); }
+p { margin: 0 0 1em; }
+a { color: var(--jl-ink); text-decoration-color: var(--jl-line); text-underline-offset: 0.15em; }
+a:hover { color: var(--jl-clay); }
+a:focus-visible, button:focus-visible, input:focus-visible {
+	outline: 2px solid var(--jl-clay);
+	outline-offset: 3px;
+}
+
+.skip-link {
+	background: var(--jl-ink);
+	color: var(--jl-paper);
+	padding: 0.75em 1.25em;
+	position: absolute;
+	left: 1em;
+	top: -100px;
+	z-index: 100000;
+	transition: top 0.2s ease;
+}
+.skip-link:focus { top: 1em; }
+
+/* =====================================================================
+   Site chrome: header + footer (rendered by header.php / footer.php,
+   NOT editable in Elementor — Elementor only edits page/post content).
+   ===================================================================== */
+.site-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 16px;
+	padding: 24px clamp(24px, 5vw, 48px);
+	border-bottom: 1px solid var(--jl-line);
+}
+.site-header .brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	text-decoration: none;
+	color: var(--jl-ink);
+}
+.site-header .brand img { width: 40px; height: 40px; flex: none; }
+.site-header .brand .name { font-weight: 700; font-size: 1.0625rem; letter-spacing: -0.01em; }
+.site-header .brand .tag { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--jl-stone); }
+
+.site-nav ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: clamp(16px, 3vw, 32px);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 0.9rem;
+	letter-spacing: 0.02em;
+}
+.site-nav a { text-decoration: none; }
+.site-nav .current-menu-item > a {
+	text-decoration: underline;
+	text-underline-offset: 0.3em;
+}
+
+.site-footer {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	justify-content: space-between;
+	padding: clamp(24px, 4vw, 40px) clamp(24px, 5vw, 48px);
+	border-top: 1px solid var(--jl-line);
+	font-size: 0.9rem;
+	color: var(--jl-stone);
+}
+.site-footer a { color: inherit; }
+.site-footer ul {
+	display: flex;
+	gap: 12px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* =====================================================================
+   Elementor default-widget reskin — så Global Colors/Fonts (sat via
+   Site Settings) er nok til at widgets rammer paletten uden at hver
+   widget skal have individuel Custom CSS.
+   ===================================================================== */
+
+/* Button widget */
+.elementor-button {
+	border-radius: 2px !important;
+	letter-spacing: 0.02em;
+}
+
+/* Posts widget (bruges til det dynamiske case-grid) */
+.elementor-widget-posts .elementor-post__card {
+	background: transparent;
+	box-shadow: none;
+}
+.elementor-widget-posts .elementor-post__thumbnail img {
+	border-radius: 2px;
+	aspect-ratio: 4 / 5;
+	object-fit: cover;
+}
+.elementor-widget-posts .elementor-post__title,
+.elementor-widget-posts .elementor-post__title a {
+	font-size: 1.25rem;
+	letter-spacing: -0.01em;
+}
+.elementor-widget-posts .elementor-post__excerpt p {
+	color: var(--jl-stone);
+	font-size: 0.95rem;
+}
+.elementor-widget-posts .elementor-post__read-more {
+	font-size: 0.9rem;
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+/* Taxonomy badge rendered by the Posts widget → pill shape */
+.elementor-widget-posts .elementor-post__badge {
+	display: inline-block;
+	position: static !important;
+	background: transparent !important;
+	color: var(--jl-stone) !important;
+	border: 1px solid var(--jl-line);
+	border-radius: 999px;
+	padding: 0.3em 0.9em;
+	font-size: 0.78rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin-bottom: 12px;
+}
+
+/* Image widget: round-crop support via the "round-photo" CSS class
+   (add it under an Image widget's Advanced → CSS Classes field) */
+.round-photo img {
+	aspect-ratio: 1 / 1;
+	object-fit: cover;
+	border-radius: 50%;
+}
+
+/* Decorative gradient-blob background image: add the "hero-blob" CSS
+   class (Advanced → CSS Classes) to an Image widget to position it
+   behind a Heading/Text widget inside the same section. Give the
+   Section itself "position: relative" via Advanced → Custom CSS
+   (Pro) or simply the "hero-visual" class defined below. */
+.hero-visual { position: relative; overflow: hidden; }
+.hero-blob {
+	position: absolute !important;
+	top: -12%;
+	right: -6%;
+	width: min(58vw, 780px) !important;
+	max-width: none !important;
+	z-index: 0;
+	pointer-events: none;
+}
+.hero-blob img { width: 100%; }
+
+/* =====================================================================
+   Plain PHP fallback grid used by archive.php (taxonomy archives etc.)
+   — not touched by Elementor, styled to match the Posts-widget reskin.
+   ===================================================================== */
+.jl-archive-intro {
+	max-width: var(--jl-wide-width);
+	margin: 0 auto;
+	padding: clamp(48px, 8vw, 72px) clamp(24px, 5vw, 48px) 0;
+}
+.jl-card-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 32px;
+	max-width: var(--jl-wide-width);
+	margin: 0 auto;
+	padding: 32px clamp(24px, 5vw, 48px) var(--jl-section-gap);
+}
+@media (max-width: 780px) {
+	.jl-card-grid { grid-template-columns: 1fr; }
+}
+.jl-card img {
+	width: 100%;
+	aspect-ratio: 4 / 5;
+	object-fit: cover;
+	border-radius: 2px;
+	background: var(--jl-sand);
+}
+.jl-card .pill {
+	display: inline-block;
+	border: 1px solid var(--jl-line);
+	border-radius: 999px;
+	padding: 0.3em 0.9em;
+	font-size: 0.78rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--jl-stone);
+	margin: 12px 0 8px;
+}
+.jl-card h2 { font-size: 1.25rem; margin: 0 0 8px; }
+.jl-card p { color: var(--jl-stone); font-size: 0.95rem; }
+
+/* Plain-PHP button (404 page etc.) — Elementor pages use the Button
+   widget instead, reskinned above via .elementor-button. */
+.jl-btn {
+	display: inline-block;
+	border: 1px solid var(--jl-ink);
+	border-radius: 2px;
+	padding: 0.9rem 1.75rem;
+	font-size: 0.9rem;
+	text-decoration: none;
+	color: var(--jl-ink);
+}
+.jl-btn:hover { background: var(--jl-ink); color: var(--jl-paper); }
+
+@media (prefers-reduced-motion: reduce) {
+	.skip-link { transition: none; }
+}

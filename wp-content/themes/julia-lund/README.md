@@ -5,6 +5,10 @@ designer. Bygget som et **fuldt block-tema (Full Site Editing)** — der er
 ingen hardcodet HTML, som skal redigeres i kode. Alt — tekst, billeder,
 farver, typografi og layout — redigeres direkte i WordPress' Editor.
 
+> Foretrækker du at redigere med **Elementor** i stedet for WordPress'
+> egen editor? Brug søster-temaet `../julia-lund-elementor/` og dets
+> `ELEMENTOR-GUIDE.md`.
+
 ## Kom i gang lokalt
 
 Du skal bruge en lokal WordPress-installation (tema alene kan ikke "åbnes"
