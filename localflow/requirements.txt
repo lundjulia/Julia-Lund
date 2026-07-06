@@ -1,0 +1,7 @@
+rumps==0.4.0
+pynput==1.7.6
+sounddevice==0.4.6
+numpy>=1.24
+faster-whisper>=1.0.0
+requests>=2.31
+pyperclip>=1.8
