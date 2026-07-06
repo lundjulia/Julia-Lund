@@ -1,0 +1,53 @@
+/**
+ * Progressive-enhancement rules that theme.json cannot express.
+ * Visual design (colors, type, spacing) lives in theme.json — this file
+ * only covers accessibility affordances and small interaction details.
+ */
+
+/* Skip link: hidden until focused, required for keyboard/screen-reader nav */
+.skip-link {
+	background: var(--wp--preset--color--ink);
+	color: var(--wp--preset--color--paper);
+	padding: 0.75em 1.25em;
+	position: absolute;
+	left: 1em;
+	top: -100px;
+	z-index: 100000;
+	transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+	top: 1em;
+}
+
+/* Consistent, visible focus state across the site */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+.wp-block-button__link:focus-visible {
+	outline: 2px solid var(--wp--preset--color--clay);
+	outline-offset: 3px;
+}
+
+/* Slightly refined underline metrics for inline links */
+.wp-block-post-content a,
+.entry-content a {
+	text-underline-offset: 0.15em;
+}
+
+/* Subtle, quick fade on linked case-card images — no heavy motion */
+.wp-block-post-featured-image a img {
+	transition: opacity 0.2s ease;
+}
+
+.wp-block-post-featured-image a:hover img {
+	opacity: 0.85;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.skip-link,
+	.wp-block-post-featured-image a img {
+		transition: none;
+	}
+}

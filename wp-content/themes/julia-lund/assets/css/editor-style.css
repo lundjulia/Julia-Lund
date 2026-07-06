@@ -1,0 +1,8 @@
+/**
+ * Editor-only refinements. Global colors/type/spacing already come from
+ * theme.json, which WordPress injects into the block editor automatically.
+ */
+
+.editor-styles-wrapper .skip-link {
+	display: none;
+}

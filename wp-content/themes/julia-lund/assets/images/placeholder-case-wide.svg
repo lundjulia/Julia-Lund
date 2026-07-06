@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Case-billede placeholder">
+	<defs>
+		<linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0" stop-color="#f1ece3"/>
+			<stop offset="1" stop-color="#e2ddd3"/>
+		</linearGradient>
+	</defs>
+	<rect width="1600" height="900" fill="url(#g3)"/>
+	<circle cx="1300" cy="200" r="220" fill="none" stroke="#b5573a" stroke-width="2" opacity="0.5"/>
+	<line x1="0" y1="900" x2="1600" y2="500" stroke="#6b6560" stroke-width="1" opacity="0.25"/>
+	<line x1="0" y1="800" x2="1600" y2="700" stroke="#6b6560" stroke-width="1" opacity="0.15"/>
+	<text x="60" y="830" font-family="ui-sans-serif, system-ui, sans-serif" font-size="26" fill="#6b6560" opacity="0.8">Erstat med case-billede</text>
+</svg>

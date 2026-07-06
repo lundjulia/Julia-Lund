@@ -1,0 +1,18 @@
+/*
+Theme Name: Julia Lund — Portfolio
+Theme URI: https://example.com
+Author: Julia Lund
+Author URI: https://example.com
+Description: Et roligt, kurateret portfolio-tema til brand- og UX/UI-designere. Bygget som et fuldt block-tema (Full Site Editing) — alt indhold, farver og typografi redigeres direkte i WordPress.
+Requires at least: 6.5
+Tested up to: 6.7
+Requires PHP: 8.0
+Version: 1.0.0
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: julia-lund
+Tags: portfolio, block-theme, full-site-editing, minimal, one-page, custom-colors, custom-menu, featured-images, editor-style
+
+Al visuel styling styres via theme.json (design tokens) og patterns/templates.
+Denne fil er kun theme-metadata + et minimalt reset — ingen hardcodet layout-CSS her.
+*/
