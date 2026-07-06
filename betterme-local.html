@@ -298,7 +298,7 @@
   .exercise-row .dur { font-size: 11.5px; color: var(--muted); }
 
   /* Player */
-  .player { background: var(--ink); color: #fff; height: 100%; display: flex; flex-direction: column; --pose-ink: var(--cream); }
+  .player { background: var(--ink); color: #fff; height: 100%; display: flex; flex-direction: column; --pose-ink: var(--muted); }
   .player .ptop { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 8px; }
   .player .close-btn {
     width: 32px; height: 32px; border-radius: 50%; border: none;
@@ -541,28 +541,40 @@
   var CAT_HERO_POSE = { Pilates: "flex", Calisthenics: "fullbody", "Chair Yoga": "rest" };
   var ZONE_POSE = { Legs: "legs", Arms: "arms", Core: "core", "Full Body": "fullbody", Flexibility: "flex" };
 
-  /* Small illustrated character (face, hair, filled outlined limbs, shoes) built
-     from primitives so every pose reuses the app's existing palette — "top" is
-     the shirt color, "soft" is the leggings/shorts tint, both already defined
-     per category above. No new illustration colors are introduced. */
+  /* Small illustrated character (face, pigtails, filled outlined limbs, shoes)
+     built from primitives so every pose reuses the app's existing palette —
+     "top" is the shirt/bra color, "soft" is the shorts tint, both already
+     defined per category above. Arms and legs stay bare (cream, like skin)
+     rather than fully covered, matching a shorts+bra silhouette. No new
+     illustration colors are introduced. */
   function capsule(x1, y1, x2, y2, w, fill) {
     return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="var(--pose-ink)" stroke-width="' + (w + 4) + '" stroke-linecap="round"/>' +
       '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + fill + '" stroke-width="' + w + '" stroke-linecap="round"/>';
   }
+  function jointDot(cx, cy, w, fill) {
+    return '<circle cx="' + cx + '" cy="' + cy + '" r="' + (w / 2 + 2) + '" fill="var(--pose-ink)"/><circle cx="' + cx + '" cy="' + cy + '" r="' + (w / 2) + '" fill="' + fill + '"/>';
+  }
   function poseHead(cx, cy, r) {
     return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="var(--cream)" stroke="var(--pose-ink)" stroke-width="3"/>';
   }
-  function poseHair(cx, cy, r) {
+  function poseBangs(cx, cy, r) {
     return '<path d="M' + (cx - r * 1.05) + ' ' + (cy - r * 0.1) + ' Q' + (cx - r * 1.15) + ' ' + (cy - r * 1.35) + ' ' + cx + ' ' + (cy - r * 1.4) +
       ' Q' + (cx + r * 1.15) + ' ' + (cy - r * 1.35) + ' ' + (cx + r * 1.05) + ' ' + (cy - r * 0.1) +
       ' Q' + (cx + r * 0.85) + ' ' + (cy - r * 0.55) + ' ' + cx + ' ' + (cy - r * 0.6) +
       ' Q' + (cx - r * 0.85) + ' ' + (cy - r * 0.55) + ' ' + (cx - r * 1.05) + ' ' + (cy - r * 0.1) + ' Z" fill="var(--pose-ink)"/>';
   }
-  function poseFace(cx, cy, r) {
-    var ex = r * 0.38;
-    return '<circle cx="' + (cx - ex) + '" cy="' + cy + '" r="1.4" fill="var(--pose-ink)"/>' +
-      '<circle cx="' + (cx + ex) + '" cy="' + cy + '" r="1.4" fill="var(--pose-ink)"/>' +
-      '<path d="M' + (cx - r * 0.3) + ' ' + (cy + r * 0.4) + ' Q' + cx + ' ' + (cy + r * 0.62) + ' ' + (cx + r * 0.3) + ' ' + (cy + r * 0.4) + '" stroke="var(--pose-ink)" stroke-width="1.6" fill="none" stroke-linecap="round"/>';
+  function posePigtail(cx, cy, r, dir) {
+    var bx = cx + dir * r * 0.95, by = cy + r * 0.25;
+    return '<circle cx="' + bx + '" cy="' + by + '" r="4.2" fill="var(--pose-ink)"/>' +
+      '<circle cx="' + (bx + dir * 1.5) + '" cy="' + (by + 5.5) + '" r="3.3" fill="var(--pose-ink)"/>';
+  }
+  function poseFace(cx, cy, r, accent) {
+    var ex = r * 0.4;
+    return '<path d="M' + (cx - ex - 3) + ' ' + (cy + 0.5) + ' Q' + (cx - ex) + ' ' + (cy - 3.2) + ' ' + (cx - ex + 3) + ' ' + (cy + 0.5) + '" stroke="var(--pose-ink)" stroke-width="1.7" fill="none" stroke-linecap="round"/>' +
+      '<path d="M' + (cx + ex - 3) + ' ' + (cy + 0.5) + ' Q' + (cx + ex) + ' ' + (cy - 3.2) + ' ' + (cx + ex + 3) + ' ' + (cy + 0.5) + '" stroke="var(--pose-ink)" stroke-width="1.7" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="' + (cx - r * 0.72) + '" cy="' + (cy + r * 0.42) + '" r="2.1" fill="' + accent + '" opacity="0.5"/>' +
+      '<circle cx="' + (cx + r * 0.72) + '" cy="' + (cy + r * 0.42) + '" r="2.1" fill="' + accent + '" opacity="0.5"/>' +
+      '<path d="M' + (cx - r * 0.3) + ' ' + (cy + r * 0.38) + ' Q' + cx + ' ' + (cy + r * 0.6) + ' ' + (cx + r * 0.3) + ' ' + (cy + r * 0.38) + '" stroke="var(--pose-ink)" stroke-width="1.8" fill="none" stroke-linecap="round"/>';
   }
   function poseTorso(x, y, w, h, rx, fill, rot, rcx, rcy) {
     var t = rot ? ' transform="rotate(' + rot + ' ' + rcx + ' ' + rcy + ')"' : "";
@@ -577,55 +589,65 @@
   function poseHand(cx, cy) {
     return '<circle cx="' + cx + '" cy="' + cy + '" r="5.5" fill="var(--cream)" stroke="var(--pose-ink)" stroke-width="2.5"/>';
   }
+  function poseHeadGroup(cx, cy, r, accent) {
+    return poseBangs(cx, cy, r) + poseHead(cx, cy, r) + posePigtail(cx, cy, r, -1) + posePigtail(cx, cy, r, 1) + poseFace(cx, cy, r, accent);
+  }
+
+  var CREAM = "var(--cream)";
 
   var POSES = {
     flex: function (top, soft) {
-      return capsule(46, 60, 42, 92, 11, soft) +
-        capsule(54, 60, 68, 66, 10, soft) + capsule(68, 66, 58, 80, 10, soft) +
-        poseShoe(42, 94, -8) + poseShoe(58, 82, 25) +
-        poseTorso(39, 34, 22, 30, 11, top, -5, 50, 49) +
-        capsule(42, 38, 30, 16, 8, "var(--cream)") + poseHand(29, 15) +
-        capsule(58, 40, 72, 50, 8, "var(--cream)") + poseHand(73, 51) +
-        poseHair(48, 20, 11) + poseHead(48, 20, 11) + poseFace(48, 20, 11);
+      return capsule(46, 58, 43, 90, 11, CREAM) +
+        capsule(54, 58, 66, 64, 10, CREAM) + jointDot(66, 64, 10, CREAM) + capsule(66, 64, 58, 78, 9, CREAM) +
+        poseShoe(43, 92, -8) + poseShoe(58, 80, 25) +
+        poseTorso(39, 32, 22, 24, 10, top, -6, 50, 44) +
+        poseTorso(38, 50, 24, 12, 6, soft, -6, 50, 56) +
+        capsule(42, 36, 30, 14, 7, CREAM) + poseHand(29, 13) +
+        capsule(58, 38, 71, 48, 7, CREAM) + poseHand(72, 49) +
+        poseHeadGroup(48, 19, 10, top);
     },
     legs: function (top, soft) {
-      return capsule(43, 58, 36, 78, 9, soft) + capsule(36, 78, 41, 94, 9, soft) +
-        capsule(57, 58, 64, 78, 9, soft) + capsule(64, 78, 59, 94, 9, soft) +
-        poseShoe(41, 95, 0) + poseShoe(59, 95, 0) +
-        capsule(41, 40, 23, 46, 8, "var(--cream)") + poseHand(21, 47) +
-        capsule(59, 40, 77, 46, 8, "var(--cream)") + poseHand(79, 47) +
-        poseTorso(39, 32, 22, 30, 10, top, 0, 50, 47) +
-        poseHair(50, 20, 11) + poseHead(50, 20, 11) + poseFace(50, 20, 11);
+      return capsule(43, 58, 37, 74, 9, CREAM) + jointDot(37, 74, 9, CREAM) + capsule(37, 74, 42, 92, 8, CREAM) +
+        capsule(57, 58, 63, 74, 9, CREAM) + jointDot(63, 74, 9, CREAM) + capsule(63, 74, 58, 92, 8, CREAM) +
+        poseShoe(41, 94, 0) + poseShoe(59, 94, 0) +
+        capsule(41, 40, 24, 46, 8, CREAM) + poseHand(21, 47) +
+        capsule(59, 40, 76, 46, 8, CREAM) + poseHand(79, 47) +
+        poseTorso(39, 30, 22, 18, 9, top, 0, 50, 39) +
+        poseTorso(38, 46, 24, 13, 6, soft, 0, 50, 52) +
+        poseHeadGroup(50, 18, 10, top);
     },
     arms: function (top, soft) {
-      return capsule(45, 62, 42, 92, 9, soft) + poseShoe(42, 94, 0) +
-        capsule(55, 62, 58, 92, 9, soft) + poseShoe(58, 94, 0) +
-        capsule(39, 38, 27, 52, 8, "var(--cream)") + capsule(27, 52, 37, 36, 8, "var(--cream)") + poseHand(37, 36) +
-        capsule(61, 38, 73, 52, 8, "var(--cream)") + capsule(73, 52, 63, 36, 8, "var(--cream)") + poseHand(63, 36) +
-        poseTorso(39, 32, 22, 30, 10, top, 0, 50, 47) +
-        poseHair(50, 20, 11) + poseHead(50, 20, 11) + poseFace(50, 20, 11);
+      return capsule(45, 62, 43, 90, 8, CREAM) + poseShoe(42, 92, 0) +
+        capsule(55, 62, 57, 90, 8, CREAM) + poseShoe(58, 92, 0) +
+        capsule(39, 38, 28, 50, 7, CREAM) + jointDot(28, 50, 7, CREAM) + capsule(28, 50, 37, 36, 7, CREAM) + poseHand(37, 36) +
+        capsule(61, 38, 72, 50, 7, CREAM) + jointDot(72, 50, 7, CREAM) + capsule(72, 50, 63, 36, 7, CREAM) + poseHand(63, 36) +
+        poseTorso(39, 30, 22, 24, 10, top, 0, 50, 42) +
+        poseTorso(38, 48, 24, 13, 6, soft, 0, 50, 54) +
+        poseHeadGroup(50, 18, 10, top);
     },
     core: function (top, soft) {
-      return capsule(52, 68, 68, 62, 9, soft) + capsule(68, 62, 78, 74, 9, soft) + poseShoe(80, 75, 60) +
-        capsule(50, 68, 60, 64, 9, soft) + capsule(60, 64, 52, 54, 9, soft) + poseShoe(52, 54, -40) +
-        capsule(40, 52, 30, 66, 8, "var(--cream)") + poseHand(28, 68) +
-        poseTorso(34, 36, 20, 28, 10, top, 26, 44, 50) +
-        poseHair(38, 26, 10) + poseHead(38, 26, 10) + poseFace(38, 26, 10);
+      return capsule(52, 68, 64, 60, 9, CREAM) + jointDot(64, 60, 9, CREAM) + capsule(64, 60, 74, 70, 8, CREAM) + poseShoe(78, 72, 55) +
+        capsule(50, 68, 58, 62, 9, CREAM) + jointDot(58, 62, 9, CREAM) + capsule(58, 62, 50, 52, 8, CREAM) + poseShoe(51, 51, -45) +
+        capsule(40, 52, 30, 64, 7, CREAM) + poseHand(28, 66) +
+        poseTorso(34, 34, 20, 22, 10, top, 24, 44, 45) +
+        poseTorso(28, 52, 22, 12, 6, soft, 24, 44, 58) +
+        poseHeadGroup(38, 24, 9, top);
     },
     fullbody: function (top, soft) {
-      return capsule(50, 60, 28, 84, 9, soft) + poseShoe(26, 86, -30) +
-        capsule(50, 60, 72, 84, 9, soft) + poseShoe(74, 86, 30) +
-        capsule(44, 38, 20, 16, 8, "var(--cream)") + poseHand(18, 14) +
-        capsule(56, 38, 80, 16, 8, "var(--cream)") + poseHand(82, 14) +
-        poseTorso(40, 32, 20, 28, 10, top, 0, 50, 46) +
-        poseHair(50, 20, 11) + poseHead(50, 20, 11) + poseFace(50, 20, 11);
+      return capsule(50, 58, 29, 82, 10, CREAM) + poseShoe(26, 84, -30) +
+        capsule(50, 58, 71, 82, 10, CREAM) + poseShoe(74, 84, 30) +
+        capsule(44, 36, 21, 15, 7, CREAM) + poseHand(19, 13) +
+        capsule(56, 36, 79, 15, 7, CREAM) + poseHand(81, 13) +
+        poseTorso(40, 30, 20, 22, 10, top, 0, 50, 41) +
+        poseTorso(38, 46, 24, 12, 6, soft, 0, 50, 52) +
+        poseHeadGroup(50, 18, 10, top);
     },
     rest: function (top, soft) {
-      return '<ellipse cx="50" cy="82" rx="28" ry="9" fill="' + soft + '" stroke="var(--pose-ink)" stroke-width="2.5"/>' +
-        capsule(40, 66, 24, 60, 9, soft) + poseHand(22, 59) +
-        capsule(60, 66, 76, 60, 9, soft) + poseHand(78, 59) +
-        poseTorso(38, 36, 24, 32, 12, top, 0, 50, 52) +
-        poseHair(50, 26, 11) + poseHead(50, 26, 11) + poseFace(50, 26, 11);
+      return '<ellipse cx="50" cy="80" rx="27" ry="8" fill="' + soft + '" stroke="var(--pose-ink)" stroke-width="2.5"/>' +
+        capsule(40, 64, 25, 58, 8, CREAM) + poseHand(22, 57) +
+        capsule(60, 64, 75, 58, 8, CREAM) + poseHand(78, 57) +
+        poseTorso(37, 32, 26, 30, 12, top, 0, 50, 47) +
+        poseHeadGroup(50, 24, 10, top);
     }
   };
 
