@@ -15,14 +15,14 @@
   --card:#fffaf1;
   --ink:#332a22;
   --ink-soft:#6f6153;
-  --rust:#c1502e;
-  --rust-dark:#9c3d22;
-  --rust-ghost:#c1502e1a;
-  --sage:#5f8863;
-  --sage-ghost:#5f88631a;
+  --accent:#2650e0;
+  --accent-dark:#17359c;
+  --accent-ghost:#2650e01a;
+  --sage:#4f8f5f;
+  --sage-ghost:#4f8f5f1a;
   --gold:#d29a3c;
-  --wrong:#b23a3a;
-  --wrong-ghost:#b23a3a1a;
+  --wrong:#c03a4a;
+  --wrong-ghost:#c03a4a1a;
   --line:#e3d5b8;
   --shadow:0 8px 24px -8px rgba(51,42,34,.28);
   --radius:18px;
@@ -30,21 +30,21 @@
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --paper:#211a15;
-    --paper-2:#2a2119;
-    --card:#2c231b;
-    --ink:#f2e6d3;
-    --ink-soft:#b5a58d;
-    --rust:#e07a4f;
-    --rust-dark:#f0946c;
-    --rust-ghost:#e07a4f26;
-    --sage:#84b389;
-    --sage-ghost:#84b38926;
+    --paper:#1a1f2b;
+    --paper-2:#222838;
+    --card:#242a3a;
+    --ink:#eef0fb;
+    --ink-soft:#9aa1bd;
+    --accent:#7d95ff;
+    --accent-dark:#a6b6ff;
+    --accent-ghost:#7d95ff29;
+    --sage:#7fc191;
+    --sage-ghost:#7fc19129;
     --gold:#e3b45c;
-    --wrong:#e17777;
-    --wrong-ghost:#e1777726;
-    --line:#3c3226;
-    --shadow:0 8px 28px -6px rgba(0,0,0,.5);
+    --wrong:#f0808f;
+    --wrong-ghost:#f0808f29;
+    --line:#343b52;
+    --shadow:0 8px 28px -6px rgba(0,0,0,.55);
     color-scheme: dark;
   }
 }
@@ -71,7 +71,7 @@ body::before{
 .app{ position:relative; z-index:1; max-width:560px; margin:0 auto; padding:20px 18px 100px; }
 
 /* Header */
-.app-header{ display:flex; align-items:center; justify-content:space-between; padding:6px 2px 18px; }
+.app-header{ display:flex; align-items:center; justify-content:space-between; padding:6px 2px 20px; }
 .brand{ display:flex; align-items:center; gap:10px; }
 .brand-jar{ width:40px; height:40px; flex-shrink:0; }
 .brand h1{ font-family:'Fraunces',serif; font-weight:700; font-size:22px; margin:0; letter-spacing:-.01em; }
@@ -107,32 +107,33 @@ body::before{
   transition:background .18s ease, color .18s ease;
 }
 .tab-btn .ic{ font-size:17px; line-height:1; }
-.tab-btn.active{ background:var(--rust); color:#fffaf1; }
+.tab-btn.active{ background:var(--accent); color:#fdfbf6; }
 
 .view{ display:none; animation:fadeUp .28s ease; }
 .view.active{ display:block; }
 @keyframes fadeUp{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
 
-h2.section-title{ font-family:'Fraunces',serif; font-size:21px; font-weight:600; margin:2px 0 14px; }
+h2.section-title{ font-family:'Fraunces',serif; font-size:21px; font-weight:600; margin:2px 0 16px; }
 .muted{ color:var(--ink-soft); font-size:13.5px; line-height:1.5; }
 
 /* Card */
 .card{
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-  box-shadow:var(--shadow); padding:18px;
+  box-shadow:var(--shadow); padding:22px;
 }
-.card + .card{ margin-top:14px; }
+.card + .card{ margin-top:16px; }
 
 /* Form */
-label{ display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:14px 0 6px; }
+label{ display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:20px 0 7px; }
 label:first-of-type{ margin-top:0; }
 input[type=text]{
   width:100%; font-family:'Karla',sans-serif; font-size:16px; font-weight:600;
   padding:12px 14px; border-radius:12px; border:1.5px solid var(--line);
   background:var(--paper); color:var(--ink); outline:none; transition:border-color .15s;
 }
-input[type=text]:focus{ border-color:var(--rust); }
-.row{ display:flex; gap:10px; }
+input[type=text]:focus{ border-color:var(--accent); }
+input[type=text]::placeholder{ font-weight:500; opacity:.55; }
+.row{ display:flex; gap:14px; }
 .row > *{ flex:1; }
 
 .btn{
@@ -142,17 +143,17 @@ input[type=text]:focus{ border-color:var(--rust); }
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
 }
 .btn:active{ transform:scale(.97); }
-.btn-primary{ background:var(--rust); color:#fffaf1; width:100%; box-shadow:0 4px 0 0 var(--rust-dark); }
-.btn-primary:active{ box-shadow:0 1px 0 0 var(--rust-dark); transform:translateY(3px) scale(.99); }
+.btn-primary{ background:var(--accent); color:#fdfbf6; width:100%; box-shadow:0 4px 0 0 var(--accent-dark); }
+.btn-primary:active{ box-shadow:0 1px 0 0 var(--accent-dark); transform:translateY(3px) scale(.99); }
 .btn-primary:disabled{ opacity:.5; cursor:default; }
-.btn-ghost{ background:transparent; color:var(--rust); border:1.5px solid var(--rust); width:100%; }
+.btn-ghost{ background:transparent; color:var(--accent); border:1.5px solid var(--accent); width:100%; }
 .btn-outline{ background:transparent; color:var(--ink-soft); border:1.5px solid var(--line); }
 .btn-sm{ padding:8px 12px; font-size:12.5px; border-radius:10px; }
-.btn-block-row{ display:flex; gap:10px; margin-top:14px; }
+.btn-block-row{ display:flex; gap:10px; margin-top:20px; }
 .btn-block-row .btn{ flex:1; }
 
-.hint-row{ display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
-.spinner{ width:14px; height:14px; border-radius:50%; border:2px solid #fffaf199; border-top-color:#fffaf1; animation:spin .7s linear infinite; }
+.translate-row{ margin-top:22px; padding-top:20px; border-top:1px dashed var(--line); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.spinner{ width:14px; height:14px; border-radius:50%; border:2px solid #fdfbf699; border-top-color:#fdfbf6; animation:spin .7s linear infinite; }
 @keyframes spin{ to{ transform:rotate(360deg); } }
 
 .toast{
@@ -165,14 +166,15 @@ input[type=text]:focus{ border-color:var(--rust); }
 /* Word list */
 .search-wrap{ margin-bottom:12px; }
 .word-item{
-  display:flex; align-items:center; gap:12px; padding:12px 4px;
+  display:flex; align-items:center; gap:12px; padding:14px 4px;
   border-bottom:1px solid var(--line);
 }
 .word-item:last-child{ border-bottom:none; }
 .word-main{ flex:1; min-width:0; }
 .word-en{ font-family:'Fraunces',serif; font-weight:600; font-size:16.5px; }
-.word-tr{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; display:flex; gap:10px; flex-wrap:wrap; }
+.word-tr{ font-size:12.5px; color:var(--ink-soft); margin-top:3px; display:flex; gap:10px; flex-wrap:wrap; }
 .word-tr span b{ color:var(--ink); font-weight:600; }
+.word-example{ font-style:italic; font-size:12px; color:var(--ink-soft); margin-top:5px; opacity:.85; }
 .box-dots{ display:flex; gap:3px; flex-shrink:0; }
 .box-dots i{ width:6px; height:6px; border-radius:50%; background:var(--line); display:block; }
 .box-dots i.on{ background:var(--sage); }
@@ -180,7 +182,7 @@ input[type=text]:focus{ border-color:var(--rust); }
   border:none; background:transparent; color:var(--ink-soft); cursor:pointer;
   font-size:16px; padding:6px; border-radius:8px; line-height:1;
 }
-.icon-btn:hover{ background:var(--rust-ghost); color:var(--rust); }
+.icon-btn:hover{ background:var(--accent-ghost); color:var(--accent); }
 .empty-state{ text-align:center; padding:40px 10px; color:var(--ink-soft); }
 .empty-state .big{ font-size:38px; margin-bottom:8px; }
 
@@ -190,11 +192,13 @@ input[type=text]:focus{ border-color:var(--rust); }
 .progress-track{ height:8px; border-radius:999px; background:var(--line); overflow:hidden; margin-bottom:22px; }
 .progress-fill{ height:100%; background:var(--sage); border-radius:999px; transition:width .3s ease; }
 
-.quiz-card{ text-align:center; padding:34px 18px 26px; min-height:120px; }
-.quiz-label{ font-size:12.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:700; margin-bottom:10px; }
-.quiz-word{ font-family:'Fraunces',serif; font-style:italic; font-weight:600; font-size:clamp(28px,7vw,38px); line-height:1.15; }
+.quiz-card{ text-align:center; padding:34px 20px 28px; min-height:120px; }
+.quiz-label{ font-size:12.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:700; margin-bottom:14px; }
+.quiz-sentence{ font-style:italic; font-size:15px; color:var(--ink-soft); line-height:1.55; margin-bottom:14px; }
+.quiz-sentence .hl{ font-style:normal; font-weight:800; color:var(--accent); }
+.quiz-word{ font-family:'Fraunces',serif; font-style:italic; font-weight:600; font-size:clamp(26px,6.5vw,36px); line-height:1.15; }
 
-.options{ display:grid; grid-template-columns:1fr; gap:10px; margin-top:16px; }
+.options{ display:grid; grid-template-columns:1fr; gap:12px; margin-top:18px; }
 .opt-btn{
   text-align:left; font-family:'Karla',sans-serif; font-weight:700; font-size:15.5px;
   padding:14px 16px; border-radius:12px; border:1.5px solid var(--line); background:var(--card);
@@ -205,9 +209,6 @@ input[type=text]:focus{ border-color:var(--rust); }
 .opt-btn.wrong{ border-color:var(--wrong); background:var(--wrong-ghost); color:var(--wrong); }
 .opt-btn.dim{ opacity:.45; }
 .opt-btn:disabled{ cursor:default; }
-
-.flash-face{ font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin-top:6px; }
-.flash-sub{ font-size:13px; color:var(--ink-soft); margin-top:6px; }
 
 .feedback-bar{
   position:fixed; left:0; right:0; bottom:0; z-index:20;
@@ -223,7 +224,7 @@ input[type=text]:focus{ border-color:var(--rust); }
 .feedback-title.good{ color:var(--sage); }
 .feedback-title.bad{ color:var(--wrong); }
 .feedback-answer{ font-size:13px; color:var(--ink-soft); margin-bottom:10px; }
-.feedback-bar .btn-primary.bad{ background:var(--wrong); box-shadow:0 4px 0 0 #7c2828; }
+.feedback-bar .btn-primary.bad{ background:var(--wrong); box-shadow:0 4px 0 0 #8c2431; }
 
 .session-end{ text-align:center; padding:26px 8px 6px; }
 .session-end .big{ font-size:52px; margin-bottom:6px; }
@@ -232,15 +233,15 @@ input[type=text]:focus{ border-color:var(--rust); }
 .pill b{ font-family:'JetBrains Mono',monospace; }
 
 /* Stats */
-.stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+.stat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
 .stat-box{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; box-shadow:var(--shadow); }
-.stat-num{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:26px; color:var(--rust); }
+.stat-num{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:26px; color:var(--accent); }
 .stat-lbl{ font-size:11.5px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
 
-.jar-wrap{ display:flex; align-items:center; gap:16px; }
+.jar-wrap{ display:flex; align-items:center; gap:18px; }
 .jar-svg{ width:76px; height:96px; flex-shrink:0; }
-.bars{ margin-top:6px; }
-.bar-row{ display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:12px; }
+.bars{ margin-top:8px; }
+.bar-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:12px; }
 .bar-row .bl{ width:64px; color:var(--ink-soft); flex-shrink:0; }
 .bar-track{ flex:1; height:10px; background:var(--paper-2); border-radius:6px; overflow:hidden; }
 .bar-fill{ height:100%; background:var(--gold); border-radius:6px; }
@@ -258,9 +259,9 @@ input[type=file]{ display:none; }
     <div class="brand">
       <svg class="brand-jar" viewBox="0 0 64 64" fill="none">
         <path d="M20 14h24l-2 6H22l-2-6z" fill="var(--gold)"/>
-        <rect x="21" y="10" width="22" height="6" rx="2" fill="var(--rust)"/>
+        <rect x="21" y="10" width="22" height="6" rx="2" fill="var(--accent)"/>
         <path d="M17 22c0-1.6 1.3-2 2.5-2h25c1.2 0 2.5.4 2.5 2v30c0 5-5 9-15 9s-15-4-15-9V22z" fill="var(--card)" stroke="var(--ink)" stroke-width="2"/>
-        <circle cx="26" cy="38" r="2.6" fill="var(--rust)"/>
+        <circle cx="26" cy="38" r="2.6" fill="var(--accent)"/>
         <circle cx="36" cy="45" r="2.6" fill="var(--sage)"/>
         <circle cx="31" cy="52" r="2.6" fill="var(--gold)"/>
       </svg>
@@ -279,10 +280,6 @@ input[type=file]{ display:none; }
       <label for="inEn">Английское слово или фраза</label>
       <input type="text" id="inEn" placeholder="например: reluctant" autocomplete="off">
 
-      <div class="hint-row">
-        <button class="btn btn-ghost btn-sm" id="btnTranslate" style="width:auto;">✨ Перевести автоматически</button>
-      </div>
-
       <div class="row">
         <div>
           <label for="inRu">По-русски</label>
@@ -294,12 +291,19 @@ input[type=file]{ display:none; }
         </div>
       </div>
 
+      <label for="inExample">Пример предложения (необязательно)</label>
+      <input type="text" id="inExample" placeholder="She was reluctant to leave the party.">
+
+      <div class="translate-row">
+        <button class="btn btn-ghost btn-sm" id="btnTranslate" style="width:auto;">✨ Перевести и найти пример</button>
+      </div>
+
       <div class="btn-block-row">
         <button class="btn btn-primary" id="btnSave">Добавить в копилку</button>
       </div>
     </div>
 
-    <h2 class="section-title" style="margin-top:24px;">Недавно добавленные</h2>
+    <h2 class="section-title" style="margin-top:26px;">Недавно добавленные</h2>
     <div class="card" id="recentList"></div>
   </section>
 
@@ -329,7 +333,7 @@ input[type=file]{ display:none; }
           <clipPath id="jarClip"><path d="M17 22c0-1.6 1.3-2 2.5-2h25c1.2 0 2.5.4 2.5 2v40c0 8-6.5 14-15 14s-15-6-15-14V22z"/></clipPath>
           <rect id="jarFill" x="15" y="20" width="34" height="0" fill="var(--gold)" clip-path="url(#jarClip)"/>
           <path d="M20 14h24l-2 6H22l-2-6z" fill="var(--gold)"/>
-          <rect x="21" y="10" width="22" height="6" rx="2" fill="var(--rust)"/>
+          <rect x="21" y="10" width="22" height="6" rx="2" fill="var(--accent)"/>
         </svg>
         <div>
           <div class="stat-num" id="masteredPct">0%</div>
@@ -346,12 +350,12 @@ input[type=file]{ display:none; }
     </div>
 
     <div class="card">
-      <label style="margin:0 0 10px;">Слова по уровням</label>
+      <label style="margin:0 0 12px;">Слова по уровням</label>
       <div class="bars" id="boxBars"></div>
     </div>
 
-    <div class="card" style="margin-top:14px;">
-      <label style="margin:0 0 4px;">Резервная копия</label>
+    <div class="card" style="margin-top:16px;">
+      <label style="margin:0 0 6px;">Резервная копия</label>
       <div class="muted">Все слова хранятся только в этом браузере. Сохрани копию, чтобы не потерять список.</div>
       <div class="io-row">
         <button class="btn btn-outline" id="btnExport">⬇️ Экспорт</button>
@@ -383,6 +387,13 @@ input[type=file]{ display:none; }
   const LS_STATS = 'evt_stats_v1';
   const INTERVALS = [0,1,2,4,7,14,30]; // days, index = box (0..6, 6 = mastered plateau)
   const MAX_BOX = INTERVALS.length - 1;
+
+  /* Filler distractors so multiple-choice always has 4 options, even with a tiny word list. */
+  const DECOYS = {
+    en: ["apple","garden","window","journey","silence","harbor","pencil","autumn","bridge","whisper","candle","mountain","kitchen","stranger","thunder","blanket","mirror","desert","feather","engine","pillow","orchard","valley","compass","lantern","meadow","ribbon","tunnel","volcano","wharf"],
+    ru: ["яблоко","сад","окно","путешествие","тишина","гавань","карандаш","осень","мост","шёпот","свеча","гора","кухня","незнакомец","гром","одеяло","зеркало","пустыня","перо","двигатель","подушка","фруктовый сад","долина","компас","фонарь","луг","лента","туннель","вулкан","пристань"],
+    da: ["æble","have","vindue","rejse","stilhed","havn","blyant","efterår","bro","hvisken","stearinlys","bjerg","køkken","fremmed","torden","tæppe","spejl","ørken","fjer","motor","pude","frugtplantage","dal","kompas","lygte","eng","bånd","tunnel","vulkan","kaj"]
+  };
 
   function uid(){
     return (crypto.randomUUID ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(16).slice(2));
@@ -443,6 +454,7 @@ input[type=file]{ display:none; }
   const inEn = document.getElementById('inEn');
   const inRu = document.getElementById('inRu');
   const inDa = document.getElementById('inDa');
+  const inExample = document.getElementById('inExample');
   const btnTranslate = document.getElementById('btnTranslate');
   const btnSave = document.getElementById('btnSave');
 
@@ -462,37 +474,63 @@ input[type=file]{ display:none; }
     }
   }
 
+  async function fetchExample(word){
+    if(!word || /\s/.test(word)) return null;
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), 8000);
+    try{
+      const res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word.toLowerCase()), {signal: ctrl.signal});
+      clearTimeout(t);
+      if(!res.ok) return null;
+      const data = await res.json();
+      if(!Array.isArray(data)) return null;
+      for(const entry of data){
+        for(const m of (entry.meanings||[])){
+          for(const d of (m.definitions||[])){
+            if(d.example) return d.example;
+          }
+        }
+      }
+      return null;
+    }catch(e){
+      clearTimeout(t);
+      return null;
+    }
+  }
+
   btnTranslate.addEventListener('click', async ()=>{
     const word = inEn.value.trim();
     if(!word){ toast('Сначала введи слово'); inEn.focus(); return; }
     btnTranslate.disabled = true;
     const original = btnTranslate.innerHTML;
-    btnTranslate.innerHTML = '<span class="spinner" style="border-color:var(--rust-ghost);border-top-color:var(--rust);"></span> Перевожу...';
-    const [ru, da] = await Promise.all([translateOne(word,'ru'), translateOne(word,'da')]);
+    btnTranslate.innerHTML = '<span class="spinner"></span> Ищу...';
+    const [ru, da, example] = await Promise.all([translateOne(word,'ru'), translateOne(word,'da'), fetchExample(word)]);
     btnTranslate.disabled = false;
     btnTranslate.innerHTML = original;
     let gotAny = false;
     if(ru){ inRu.value = ru; gotAny = true; }
     if(da){ inDa.value = da; gotAny = true; }
+    if(example && !inExample.value.trim()){ inExample.value = example; }
     if(!gotAny){ toast('Не получилось перевести — впиши перевод вручную'); }
-    else toast('Перевод готов, проверь и поправь при желании');
+    else toast('Готово, проверь и поправь при желании');
   });
 
   btnSave.addEventListener('click', ()=>{
     const en = inEn.value.trim();
     const ru = inRu.value.trim();
     const da = inDa.value.trim();
+    const example = inExample.value.trim();
     if(!en){ toast('Введи английское слово'); inEn.focus(); return; }
     if(!ru && !da){ toast('Добавь хотя бы один перевод'); return; }
     words.unshift({
-      id: uid(), en, ru, da,
+      id: uid(), en, ru, da, example,
       box: 0,
       nextReview: today(),
       createdAt: today(),
       correct: 0, wrong: 0
     });
     saveWords(words);
-    inEn.value=''; inRu.value=''; inDa.value='';
+    inEn.value=''; inRu.value=''; inDa.value=''; inExample.value='';
     inEn.focus();
     toast('Добавлено: '+en+' 🎉');
     renderRecent();
@@ -516,10 +554,12 @@ input[type=file]{ display:none; }
     const tr = [];
     if(w.ru) tr.push('<span>🇷🇺 <b>'+esc(w.ru)+'</b></span>');
     if(w.da) tr.push('<span>🇩🇰 <b>'+esc(w.da)+'</b></span>');
+    const exampleHtml = w.example ? `<div class="word-example">"${esc(w.example)}"</div>` : '';
     return `<div class="word-item" data-id="${w.id}">
       <div class="word-main">
         <div class="word-en">${esc(w.en)}</div>
         <div class="word-tr">${tr.join('')}</div>
+        ${exampleHtml}
       </div>
       ${dots}
       <button class="icon-btn" data-del="${w.id}" title="Удалить">✕</button>
@@ -581,7 +621,7 @@ input[type=file]{ display:none; }
       const n = Math.min(due.length, SESSION_CAP);
       area.innerHTML = `<div class="card practice-intro">
         <div class="big">🎯</div>
-        <div style="font-family:'Fraunces',serif;font-weight:600;font-size:19px;margin-bottom:6px;">Сегодня на повторении: ${due.length} слов${ruWordSuffix(due.length)}</div>
+        <div style="font-family:'Fraunces',serif;font-weight:600;font-size:19px;margin-bottom:6px;">Сегодня на повторении: ${due.length} слов</div>
         <div class="muted">Сессия — примерно ${n} карточек, ~5 минут.</div>
         <div style="margin-top:18px;"><button class="btn btn-primary" id="btnStart">Начать практику</button></div>
       </div>`;
@@ -595,13 +635,6 @@ input[type=file]{ display:none; }
       </div>`;
       document.getElementById('btnExtra').addEventListener('click', ()=>startSession(true));
     }
-  }
-  function ruWordSuffix(n){
-    const m = n%100;
-    if(m>=11 && m<=14) return '';
-    const l = n%10;
-    if(l===1) return '';
-    return '';
   }
 
   function startSession(extra){
@@ -618,11 +651,34 @@ input[type=file]{ display:none; }
 
   function getWord(id){ return words.find(w=>w.id===id); }
 
-  function buildOptions(word, lang){
-    const pool = words.filter(w => w.id!==word.id && w[lang]);
-    const distractors = shuffle(pool).slice(0,3).map(w=>w[lang]);
-    const opts = shuffle([word[lang], ...distractors]);
-    return opts;
+  /* Builds 4 shuffled options: the correct value plus up to 3 distractors,
+     drawn from the user's own words first and padded with a filler bank
+     so multiple-choice works even with very few saved words. */
+  function buildOptions(correct, poolValues, decoyBank){
+    const seen = new Set([correct.toLowerCase()]);
+    const candidates = [];
+    shuffle(poolValues).forEach(v=>{
+      const key = v.toLowerCase();
+      if(!seen.has(key)){ seen.add(key); candidates.push(v); }
+    });
+    let guard = 0;
+    while(candidates.length < 3 && guard < 200){
+      guard++;
+      const pick = decoyBank[Math.floor(Math.random()*decoyBank.length)];
+      const key = pick.toLowerCase();
+      if(!seen.has(key)){ seen.add(key); candidates.push(pick); }
+    }
+    return shuffle([correct, ...candidates.slice(0,3)]);
+  }
+
+  function highlightWord(sentence, word){
+    const escaped = esc(sentence);
+    const safeWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp('\\b('+safeWord+'\\w*)', 'i');
+    if(re.test(escaped)){
+      return escaped.replace(re, '<span class="hl">$1</span>');
+    }
+    return escaped;
   }
 
   function renderQuiz(){
@@ -634,65 +690,50 @@ input[type=file]{ display:none; }
     if(!word){ session.queue.shift(); return renderQuiz(); }
 
     const availLangs = ['ru','da'].filter(l=>word[l]);
+    if(!availLangs.length){ session.queue.shift(); return renderQuiz(); }
     const lang = availLangs[Math.floor(Math.random()*availLangs.length)];
-    const candidatesForLang = words.filter(w=>w[lang]).length;
+    const direction = Math.random() < 0.5 ? 'en2tr' : 'tr2en';
     const progressPct = Math.round((session.done/session.total)*100);
+    const langLabel = lang==='ru' ? '🇷🇺 русский' : '🇩🇰 датский';
 
-    let bodyHtml;
-    if(candidatesForLang >= 4){
-      const opts = buildOptions(word, lang);
-      bodyHtml = `<div class="card quiz-card">
-        <div class="quiz-label">Что значит это слово? (${lang==='ru'?'🇷🇺 русский':'🇩🇰 датский'})</div>
-        <div class="quiz-word">${esc(word.en)}</div>
-      </div>
+    let correctVal, promptHtml;
+    if(direction === 'en2tr'){
+      correctVal = word[lang];
+      const sentenceHtml = word.example ? `<div class="quiz-sentence">${highlightWord(word.example, word.en)}</div>` : '';
+      promptHtml = `<div class="quiz-label">Что значит это слово? (${langLabel})</div>
+        ${sentenceHtml}
+        <div class="quiz-word">${esc(word.en)}</div>`;
+    }else{
+      correctVal = word.en;
+      promptHtml = `<div class="quiz-label">Как это будет по-английски? (${langLabel})</div>
+        <div class="quiz-word">${esc(word[lang])}</div>`;
+    }
+
+    const poolValues = direction === 'en2tr'
+      ? words.filter(w => w.id!==word.id && w[lang]).map(w=>w[lang])
+      : words.filter(w => w.id!==word.id).map(w=>w.en);
+    const decoyBank = direction === 'en2tr' ? DECOYS[lang] : DECOYS.en;
+    const opts = buildOptions(correctVal, poolValues, decoyBank);
+
+    area.innerHTML = `<div class="progress-track"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+      <div class="card quiz-card">${promptHtml}</div>
       <div class="options" id="optWrap">
         ${opts.map(o=>`<button class="opt-btn" data-val="${esc(o)}">${esc(o)}</button>`).join('')}
       </div>`;
-    }else{
-      bodyHtml = `<div class="card quiz-card">
-        <div class="quiz-label">Вспомни перевод, потом переверни</div>
-        <div class="quiz-word">${esc(word.en)}</div>
-        <div id="flashAnswer" style="display:none;">
-          <div class="flash-face">${[word.ru&&('🇷🇺 '+word.ru), word.da&&('🇩🇰 '+word.da)].filter(Boolean).join(' &nbsp;·&nbsp; ')}</div>
-        </div>
-        <div style="margin-top:18px;">
-          <button class="btn btn-outline" id="btnFlip">Показать перевод</button>
-        </div>
-      </div>
-      <div class="options" id="flashOpts" style="display:none;">
-        <button class="opt-btn" data-flash="no">😕 Не знал(а)</button>
-        <button class="opt-btn" data-flash="yes">✅ Знал(а)!</button>
-      </div>`;
-    }
 
-    area.innerHTML = `<div class="progress-track"><div class="progress-fill" style="width:${progressPct}%"></div></div>` + bodyHtml;
-
-    if(candidatesForLang >= 4){
-      document.querySelectorAll('#optWrap .opt-btn').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const chosen = btn.dataset.val;
-          const isCorrect = chosen === word[lang];
-          document.querySelectorAll('#optWrap .opt-btn').forEach(b=>{
-            b.disabled = true;
-            if(b.dataset.val === word[lang]) b.classList.add('correct');
-            else if(b===btn && !isCorrect) b.classList.add('wrong');
-            else b.classList.add('dim');
-          });
-          answer(item, isCorrect, word[lang]);
+    document.querySelectorAll('#optWrap .opt-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const chosen = btn.dataset.val;
+        const isCorrect = chosen === correctVal;
+        document.querySelectorAll('#optWrap .opt-btn').forEach(b=>{
+          b.disabled = true;
+          if(b.dataset.val === correctVal) b.classList.add('correct');
+          else if(b===btn && !isCorrect) b.classList.add('wrong');
+          else b.classList.add('dim');
         });
+        answer(item, isCorrect, correctVal);
       });
-    }else{
-      document.getElementById('btnFlip').addEventListener('click', ()=>{
-        document.getElementById('flashAnswer').style.display = 'block';
-        document.getElementById('flashOpts').style.display = 'grid';
-        document.getElementById('btnFlip').style.display = 'none';
-      });
-      area.querySelectorAll('#flashOpts .opt-btn').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          answer(item, btn.dataset.flash==='yes', null);
-        });
-      });
-    }
+    });
   }
 
   function answer(item, correct, correctText){
@@ -732,7 +773,7 @@ input[type=file]{ display:none; }
     bar.className = 'feedback-bar show ' + (correct ? 'good':'bad');
     const answerLine = correct
       ? ''
-      : `<div class="feedback-answer">Правильно: ${esc(correctText || [word.ru,word.da].filter(Boolean).join(' / '))}</div>`;
+      : `<div class="feedback-answer">Правильно: ${esc(correctText)}</div>`;
     bar.innerHTML = `<div class="feedback-inner">
       <div class="feedback-title ${correct?'good':'bad'}">${correct?'✅ Верно!':'❌ Не в этот раз'}</div>
       ${answerLine}
@@ -843,7 +884,7 @@ input[type=file]{ display:none; }
           const existingEn = new Set(words.map(w=>w.en.toLowerCase()));
           const toAdd = data.words.filter(w=> w && w.en && !existingEn.has(w.en.toLowerCase()));
           words = words.concat(toAdd.map(w=>({
-            id: w.id || uid(), en:w.en, ru:w.ru||'', da:w.da||'',
+            id: w.id || uid(), en:w.en, ru:w.ru||'', da:w.da||'', example:w.example||'',
             box: typeof w.box==='number'?w.box:0,
             nextReview: w.nextReview || today(),
             createdAt: w.createdAt || today(),
