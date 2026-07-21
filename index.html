@@ -204,6 +204,8 @@ input[type=text]::placeholder{ font-weight:500; opacity:.55; }
 .quiz-label{ font-size:12.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:700; margin-bottom:14px; }
 .quiz-sentence{ font-style:italic; font-size:15px; color:var(--ink-soft); line-height:1.55; margin-bottom:14px; }
 .quiz-sentence .hl{ font-style:normal; font-weight:800; color:var(--accent); }
+.quiz-cloze{ font-style:normal; font-size:19px; color:var(--ink); line-height:1.65; font-weight:500; margin-bottom:0; }
+.quiz-cloze .blank{ display:inline-block; min-width:70px; border-bottom:2.5px solid var(--accent); color:var(--accent); font-weight:800; text-align:center; }
 .quiz-word{ font-family:'Fraunces',serif; font-style:italic; font-weight:600; font-size:clamp(26px,6.5vw,36px); line-height:1.15; }
 .quiz-word-row{ display:flex; align-items:center; justify-content:center; gap:12px; }
 
@@ -367,7 +369,8 @@ input[type=file]{ display:none; }
 
     <div class="card" style="margin-top:16px;">
       <label style="margin:0 0 6px;">Резервная копия</label>
-      <div class="muted">Все слова хранятся только в этом браузере. Сохрани копию, чтобы не потерять список.</div>
+      <div class="muted">Все слова хранятся только в этом браузере, на этом устройстве и по этой ссылке. Открывай всегда одну и ту же ссылку и время от времени делай экспорт, чтобы не потерять список.</div>
+      <div class="muted" id="lastSavedInfo" style="margin-top:8px;font-weight:700;"></div>
       <div class="io-row">
         <button class="btn btn-outline" id="btnExport">⬇️ Экспорт</button>
         <button class="btn btn-outline" id="btnImport">⬆️ Импорт</button>
@@ -396,6 +399,7 @@ input[type=file]{ display:none; }
   /* ---------- Data layer ---------- */
   const LS_WORDS = 'evt_words_v1';
   const LS_STATS = 'evt_stats_v1';
+  const LS_LAST_SAVE = 'evt_last_save_v1';
   const INTERVALS = [0,1,2,4,7,14,30]; // days, index = box (0..6, 6 = mastered plateau)
   const MAX_BOX = INTERVALS.length - 1;
 
@@ -421,7 +425,18 @@ input[type=file]{ display:none; }
   function loadWords(){
     try{ return JSON.parse(localStorage.getItem(LS_WORDS)) || []; }catch(e){ return []; }
   }
-  function saveWords(w){ localStorage.setItem(LS_WORDS, JSON.stringify(w)); }
+  function saveWords(w){
+    try{
+      localStorage.setItem(LS_WORDS, JSON.stringify(w));
+      localStorage.setItem(LS_LAST_SAVE, new Date().toISOString());
+      const check = localStorage.getItem(LS_WORDS);
+      if(!check || JSON.parse(check).length !== w.length){
+        toast('⚠️ Похоже, браузер не сохранил изменения — сделай экспорт на вкладке «Прогресс»');
+      }
+    }catch(e){
+      toast('⚠️ Не получилось сохранить в этом браузере (возможно, режим приватного просмотра)');
+    }
+  }
 
   function loadStats(){
     try{
@@ -533,21 +548,48 @@ input[type=file]{ display:none; }
     }
   }
 
-  btnTranslate.addEventListener('click', async ()=>{
+  let lastAutoTranslated = '';
+  async function runTranslate(word, silent){
+    if(!word) return;
+    if(!silent){
+      btnTranslate.disabled = true;
+      var original = btnTranslate.innerHTML;
+      btnTranslate.innerHTML = '<span class="spinner"></span> Ищу...';
+    }
+    const [ru, da, example] = await Promise.all([translateOne(word,'ru'), translateOne(word,'da'), fetchExample(word)]);
+    if(inEn.value.trim() !== word) return; // word changed while we were waiting — discard stale result
+    if(!silent){
+      btnTranslate.disabled = false;
+      btnTranslate.innerHTML = original;
+    }
+    let gotAny = false;
+    if(ru && !inRu.value.trim()){ inRu.value = ru; gotAny = true; }
+    if(da && !inDa.value.trim()){ inDa.value = da; gotAny = true; }
+    if(example && !inExample.value.trim()){ inExample.value = example; }
+    if(!silent){
+      if(!gotAny) toast('Не получилось перевести — впиши перевод вручную');
+      else toast('Готово, проверь и поправь при желании');
+    }
+  }
+
+  btnTranslate.addEventListener('click', ()=>{
     const word = inEn.value.trim();
     if(!word){ toast('Сначала введи слово'); inEn.focus(); return; }
-    btnTranslate.disabled = true;
-    const original = btnTranslate.innerHTML;
-    btnTranslate.innerHTML = '<span class="spinner"></span> Ищу...';
-    const [ru, da, example] = await Promise.all([translateOne(word,'ru'), translateOne(word,'da'), fetchExample(word)]);
-    btnTranslate.disabled = false;
-    btnTranslate.innerHTML = original;
-    let gotAny = false;
-    if(ru){ inRu.value = ru; gotAny = true; }
-    if(da){ inDa.value = da; gotAny = true; }
-    if(example && !inExample.value.trim()){ inExample.value = example; }
-    if(!gotAny){ toast('Не получилось перевести — впиши перевод вручную'); }
-    else toast('Готово, проверь и поправь при желании');
+    lastAutoTranslated = word;
+    runTranslate(word, false);
+  });
+
+  let autoTranslateTimer;
+  inEn.addEventListener('input', ()=>{
+    clearTimeout(autoTranslateTimer);
+    const word = inEn.value.trim();
+    if(word.length < 2 || word === lastAutoTranslated) return;
+    autoTranslateTimer = setTimeout(()=>{
+      const current = inEn.value.trim();
+      if(current.length < 2 || current === lastAutoTranslated) return;
+      lastAutoTranslated = current;
+      runTranslate(current, true);
+    }, 900);
   });
 
   btnSave.addEventListener('click', ()=>{
@@ -710,14 +752,25 @@ input[type=file]{ display:none; }
     return shuffle([correct, ...candidates.slice(0,3)]);
   }
 
+  function matchWordRegex(word){
+    const safeWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp('\\b('+safeWord+'\\w*)', 'i');
+  }
   function highlightWord(sentence, word){
     const escaped = esc(sentence);
-    const safeWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp('\\b('+safeWord+'\\w*)', 'i');
+    const re = matchWordRegex(word);
     if(re.test(escaped)){
       return escaped.replace(re, '<span class="hl">$1</span>');
     }
     return escaped;
+  }
+  function blankWord(sentence, word){
+    const escaped = esc(sentence);
+    const re = matchWordRegex(word);
+    if(re.test(escaped)){
+      return escaped.replace(re, '<span class="blank">_____</span>');
+    }
+    return null;
   }
 
   function renderQuiz(){
@@ -731,12 +784,23 @@ input[type=file]{ display:none; }
     const availLangs = ['ru','da'].filter(l=>word[l]);
     if(!availLangs.length){ session.queue.shift(); return renderQuiz(); }
     const lang = availLangs[Math.floor(Math.random()*availLangs.length)];
-    const direction = Math.random() < 0.5 ? 'en2tr' : 'tr2en';
     const progressPct = Math.round((session.done/session.total)*100);
     const langLabel = lang==='ru' ? '🇷🇺 русский' : '🇩🇰 датский';
 
+    const directionPool = word.example ? ['en2tr','tr2en','cloze'] : ['en2tr','tr2en'];
+    let direction = directionPool[Math.floor(Math.random()*directionPool.length)];
+    let blanked = null;
+    if(direction === 'cloze'){
+      blanked = blankWord(word.example, word.en);
+      if(!blanked) direction = 'en2tr'; // the example uses an inflected form we can't cleanly blank — fall back
+    }
+
     let correctVal, promptHtml;
-    if(direction === 'en2tr'){
+    if(direction === 'cloze'){
+      correctVal = word.en;
+      promptHtml = `<div class="quiz-label">Вставь пропущенное слово</div>
+        <div class="quiz-sentence quiz-cloze">${blanked}</div>`;
+    }else if(direction === 'en2tr'){
       correctVal = word[lang];
       const sentenceHtml = word.example ? `<div class="quiz-sentence">${highlightWord(word.example, word.en)}</div>` : '';
       promptHtml = `<div class="quiz-label">Что значит это слово? (${langLabel})</div>
@@ -910,6 +974,15 @@ input[type=file]{ display:none; }
         <div class="bar-track"><div class="bar-fill" style="width:${c? (c/maxC*100):0}%"></div></div>
         <div class="bn">${c}</div>
       </div>`).join('');
+
+    const lastSaveRaw = localStorage.getItem(LS_LAST_SAVE);
+    const info = document.getElementById('lastSavedInfo');
+    if(lastSaveRaw){
+      const d = new Date(lastSaveRaw);
+      info.textContent = `✅ Сохранено в этом браузере: ${total} слов · ${pad(d.getDate())}.${pad(d.getMonth()+1)} в ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }else{
+      info.textContent = total ? '' : 'Пока нечего сохранять.';
+    }
   }
 
   document.getElementById('btnExport').addEventListener('click', ()=>{
