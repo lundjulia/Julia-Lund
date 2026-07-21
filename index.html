@@ -183,6 +183,14 @@ input[type=text]::placeholder{ font-weight:500; opacity:.55; }
   font-size:16px; padding:6px; border-radius:8px; line-height:1;
 }
 .icon-btn:hover{ background:var(--accent-ghost); color:var(--accent); }
+.speak-btn{
+  border:1.5px solid var(--line); background:var(--card); color:var(--accent); cursor:pointer;
+  width:40px; height:40px; border-radius:50%; font-size:17px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; transition:background .12s, transform .1s;
+}
+.speak-btn:hover{ background:var(--accent-ghost); }
+.speak-btn:active{ transform:scale(.92); }
+.speak-btn-sm{ width:30px; height:30px; font-size:14px; }
 .empty-state{ text-align:center; padding:40px 10px; color:var(--ink-soft); }
 .empty-state .big{ font-size:38px; margin-bottom:8px; }
 
@@ -197,6 +205,7 @@ input[type=text]::placeholder{ font-weight:500; opacity:.55; }
 .quiz-sentence{ font-style:italic; font-size:15px; color:var(--ink-soft); line-height:1.55; margin-bottom:14px; }
 .quiz-sentence .hl{ font-style:normal; font-weight:800; color:var(--accent); }
 .quiz-word{ font-family:'Fraunces',serif; font-style:italic; font-weight:600; font-size:clamp(26px,6.5vw,36px); line-height:1.15; }
+.quiz-word-row{ display:flex; align-items:center; justify-content:center; gap:12px; }
 
 .options{ display:grid; grid-template-columns:1fr; gap:12px; margin-top:18px; }
 .opt-btn{
@@ -220,6 +229,7 @@ input[type=text]::placeholder{ font-weight:500; opacity:.55; }
 .feedback-bar.good{ background:var(--sage-ghost); border-top-color:var(--sage); }
 .feedback-bar.bad{ background:var(--wrong-ghost); border-top-color:var(--wrong); }
 .feedback-inner{ max-width:560px; margin:0 auto; }
+.feedback-title-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .feedback-title{ font-weight:800; font-size:15px; margin-bottom:2px; display:flex; align-items:center; gap:7px; }
 .feedback-title.good{ color:var(--sage); }
 .feedback-title.bad{ color:var(--wrong); }
@@ -295,6 +305,7 @@ input[type=file]{ display:none; }
       <input type="text" id="inExample" placeholder="She was reluctant to leave the party.">
 
       <div class="translate-row">
+        <button class="speak-btn" id="btnSpeakEn" title="Прослушать произношение" aria-label="Прослушать произношение">🔊</button>
         <button class="btn btn-ghost btn-sm" id="btnTranslate" style="width:auto;">✨ Перевести и найти пример</button>
       </div>
 
@@ -422,6 +433,23 @@ input[type=file]{ display:none; }
   let words = loadWords();
   let stats = loadStats();
 
+  /* ---------- Speech ---------- */
+  let speechWarned = false;
+  function speak(text, lang){
+    if(!text) return;
+    if(!('speechSynthesis' in window)){
+      if(!speechWarned){ toast('Озвучка не поддерживается в этом браузере'); speechWarned = true; }
+      return;
+    }
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang || 'en-US';
+      u.rate = 0.92;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
   /* ---------- Toast ---------- */
   let toastTimer;
   function toast(msg){
@@ -457,6 +485,13 @@ input[type=file]{ display:none; }
   const inExample = document.getElementById('inExample');
   const btnTranslate = document.getElementById('btnTranslate');
   const btnSave = document.getElementById('btnSave');
+  const btnSpeakEn = document.getElementById('btnSpeakEn');
+
+  btnSpeakEn.addEventListener('click', ()=>{
+    const word = inEn.value.trim();
+    if(!word){ toast('Сначала введи слово'); inEn.focus(); return; }
+    speak(word, 'en-US');
+  });
 
   async function translateOne(text, lang){
     const ctrl = new AbortController();
@@ -562,10 +597,14 @@ input[type=file]{ display:none; }
         ${exampleHtml}
       </div>
       ${dots}
+      <button class="icon-btn" data-speak="${esc(w.en)}" title="Прослушать" aria-label="Прослушать произношение">🔊</button>
       <button class="icon-btn" data-del="${w.id}" title="Удалить">✕</button>
     </div>`;
   }
   function bindWordItemEvents(root){
+    root.querySelectorAll('[data-speak]').forEach(btn=>{
+      btn.addEventListener('click', ()=> speak(btn.dataset.speak, 'en-US'));
+    });
     root.querySelectorAll('[data-del]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const id = btn.dataset.del;
@@ -702,7 +741,10 @@ input[type=file]{ display:none; }
       const sentenceHtml = word.example ? `<div class="quiz-sentence">${highlightWord(word.example, word.en)}</div>` : '';
       promptHtml = `<div class="quiz-label">Что значит это слово? (${langLabel})</div>
         ${sentenceHtml}
-        <div class="quiz-word">${esc(word.en)}</div>`;
+        <div class="quiz-word-row">
+          <div class="quiz-word">${esc(word.en)}</div>
+          <button class="speak-btn speak-btn-sm" id="btnSpeakWord" title="Прослушать" aria-label="Прослушать произношение">🔊</button>
+        </div>`;
     }else{
       correctVal = word.en;
       promptHtml = `<div class="quiz-label">Как это будет по-английски? (${langLabel})</div>
@@ -720,6 +762,11 @@ input[type=file]{ display:none; }
       <div class="options" id="optWrap">
         ${opts.map(o=>`<button class="opt-btn" data-val="${esc(o)}">${esc(o)}</button>`).join('')}
       </div>`;
+
+    if(direction === 'en2tr'){
+      document.getElementById('btnSpeakWord').addEventListener('click', ()=> speak(word.en, 'en-US'));
+      speak(word.en, 'en-US');
+    }
 
     document.querySelectorAll('#optWrap .opt-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -775,14 +822,19 @@ input[type=file]{ display:none; }
       ? ''
       : `<div class="feedback-answer">Правильно: ${esc(correctText)}</div>`;
     bar.innerHTML = `<div class="feedback-inner">
-      <div class="feedback-title ${correct?'good':'bad'}">${correct?'✅ Верно!':'❌ Не в этот раз'}</div>
+      <div class="feedback-title-row">
+        <div class="feedback-title ${correct?'good':'bad'}">${correct?'✅ Верно!':'❌ Не в этот раз'}</div>
+        <button class="icon-btn speak-btn-sm" id="btnSpeakFeedback" title="Прослушать" aria-label="Прослушать произношение">🔊</button>
+      </div>
       ${answerLine}
       <button class="btn btn-primary ${correct?'':'bad'}" id="btnContinue">Продолжить</button>
     </div>`;
+    document.getElementById('btnSpeakFeedback').addEventListener('click', ()=> speak(word.en, 'en-US'));
     document.getElementById('btnContinue').addEventListener('click', ()=>{
       bar.classList.remove('show');
       renderQuiz();
     });
+    speak(word.en, 'en-US');
   }
 
   function renderSessionEnd(){
