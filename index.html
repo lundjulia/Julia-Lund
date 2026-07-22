@@ -118,6 +118,17 @@ input[type=text]::placeholder{ font-weight:500; color:var(--ink-soft); opacity:.
 .row{ display:flex; gap:14px; }
 .row > *{ flex:1; }
 
+.candidates{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.candidates:empty{ margin-top:0; }
+.chip{
+  appearance:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:700; font-size:12px; border-radius:999px; padding:6px 11px;
+  background:var(--paper-2); border:1px solid var(--line); color:var(--ink-soft);
+  transition:background .12s, color .12s, border-color .12s;
+}
+.chip:hover{ border-color:var(--accent); color:var(--ink); }
+.chip.active{ background:var(--accent-ghost); border-color:var(--accent); color:var(--accent-2); }
+
 .btn{
   appearance:none; border:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;
   font-weight:800; font-size:14.5px; border-radius:14px; padding:14px 20px;
@@ -285,10 +296,12 @@ input[type=file]{ display:none; }
         <div>
           <label for="inRu">По-русски</label>
           <input type="text" id="inRu" placeholder="неохотный">
+          <div class="candidates" id="ruCandidates"></div>
         </div>
         <div>
           <label for="inDa">По-датски</label>
           <input type="text" id="inDa" placeholder="modvillig">
+          <div class="candidates" id="daCandidates"></div>
         </div>
       </div>
 
@@ -653,26 +666,43 @@ input[type=file]{ display:none; }
     speak(word, 'en-US');
   });
 
-  async function translateOneAttempt(text, lang){
+  /* Returns several candidate translations (not just the single "best" guess),
+     since machine translation of a lone word is often wrong — the user picks
+     whichever fits, or types their own. */
+  async function translateCandidatesAttempt(text, lang){
     const ctrl = new AbortController();
     const t = setTimeout(()=>ctrl.abort(), 12000);
     try{
       const res = await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=en|'+lang, {signal: ctrl.signal});
       const data = await res.json();
       clearTimeout(t);
-      const out = data && data.responseData && data.responseData.translatedText;
-      if(!out || /invalid|error/i.test(out)) return null;
+      const seen = new Set();
+      const out = [];
+      const push = (val)=>{
+        const clean = (val||'').trim();
+        if(!clean || /invalid|error/i.test(clean)) return;
+        const key = clean.toLowerCase();
+        if(seen.has(key)) return;
+        seen.add(key); out.push(clean);
+      };
+      push(data && data.responseData && data.responseData.translatedText);
+      const matches = Array.isArray(data && data.matches) ? data.matches.slice() : [];
+      matches.sort((a,b)=> (b.quality||b.match||0) - (a.quality||a.match||0));
+      for(const m of matches){
+        if(out.length >= 4) break;
+        if(m && Number(m.quality||m.match*100||0) >= 55) push(m.translation);
+      }
       return out;
     }catch(e){
       clearTimeout(t);
-      return null;
+      return [];
     }
   }
-  async function translateOne(text, lang){
-    const first = await translateOneAttempt(text, lang);
-    if(first) return first;
+  async function translateCandidates(text, lang){
+    const first = await translateCandidatesAttempt(text, lang);
+    if(first.length) return first;
     await new Promise(r=>setTimeout(r, 600));
-    return translateOneAttempt(text, lang);
+    return translateCandidatesAttempt(text, lang);
   }
 
   async function fetchExample(word){
@@ -699,6 +729,23 @@ input[type=file]{ display:none; }
     }
   }
 
+  function renderCandidates(containerId, input, list){
+    const box = document.getElementById(containerId);
+    if(!list.length){ box.innerHTML = ''; return; }
+    box.innerHTML = list.map(v=>`<button type="button" class="chip" data-val="${esc(v)}">${esc(v)}</button>`).join('');
+    box.querySelectorAll('.chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        input.value = chip.dataset.val;
+        box.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active', c===chip));
+      });
+      if(chip.dataset.val === input.value.trim()) chip.classList.add('active');
+    });
+  }
+  function clearCandidates(){
+    document.getElementById('ruCandidates').innerHTML = '';
+    document.getElementById('daCandidates').innerHTML = '';
+  }
+
   let lastAutoTranslated = '';
   async function runTranslate(word, silent){
     if(!word) return;
@@ -707,19 +754,21 @@ input[type=file]{ display:none; }
       var original = btnTranslate.innerHTML;
       btnTranslate.innerHTML = '<span class="spinner"></span> Ищу...';
     }
-    const [ru, da, example] = await Promise.all([translateOne(word,'ru'), translateOne(word,'da'), fetchExample(word)]);
+    const [ruList, daList, example] = await Promise.all([translateCandidates(word,'ru'), translateCandidates(word,'da'), fetchExample(word)]);
     if(inEn.value.trim() !== word) return; // word changed while we were waiting — discard stale result
     if(!silent){
       btnTranslate.disabled = false;
       btnTranslate.innerHTML = original;
     }
     let gotAny = false;
-    if(ru && !inRu.value.trim()){ inRu.value = ru; gotAny = true; }
-    if(da && !inDa.value.trim()){ inDa.value = da; gotAny = true; }
+    if(ruList.length){ if(!inRu.value.trim()) inRu.value = ruList[0]; gotAny = true; }
+    if(daList.length){ if(!inDa.value.trim()) inDa.value = daList[0]; gotAny = true; }
     if(example && !inExample.value.trim()){ inExample.value = example; }
+    renderCandidates('ruCandidates', inRu, ruList);
+    renderCandidates('daCandidates', inDa, daList);
     if(!silent){
       if(!gotAny) toast('Не получилось перевести — впиши перевод вручную');
-      else toast('Готово, проверь и поправь при желании');
+      else toast('Готово, выбери вариант или впиши свой');
     }
   }
 
@@ -734,6 +783,7 @@ input[type=file]{ display:none; }
   inEn.addEventListener('input', ()=>{
     clearTimeout(autoTranslateTimer);
     const word = inEn.value.trim();
+    if(word !== lastAutoTranslated) clearCandidates();
     if(word.length < 2 || word === lastAutoTranslated) return;
     autoTranslateTimer = setTimeout(()=>{
       const current = inEn.value.trim();
@@ -759,6 +809,7 @@ input[type=file]{ display:none; }
     });
     saveWords(words);
     inEn.value=''; inRu.value=''; inDa.value=''; inExample.value='';
+    clearCandidates();
     inEn.focus();
     toast('Добавлено: '+en);
     renderRecent();
