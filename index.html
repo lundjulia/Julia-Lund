@@ -508,9 +508,9 @@ input[type=file]{ display:none; }
     speak(word, 'en-US');
   });
 
-  async function translateOne(text, lang){
+  async function translateOneAttempt(text, lang){
     const ctrl = new AbortController();
-    const t = setTimeout(()=>ctrl.abort(), 8000);
+    const t = setTimeout(()=>ctrl.abort(), 12000);
     try{
       const res = await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=en|'+lang, {signal: ctrl.signal});
       const data = await res.json();
@@ -523,11 +523,17 @@ input[type=file]{ display:none; }
       return null;
     }
   }
+  async function translateOne(text, lang){
+    const first = await translateOneAttempt(text, lang);
+    if(first) return first;
+    await new Promise(r=>setTimeout(r, 600));
+    return translateOneAttempt(text, lang);
+  }
 
   async function fetchExample(word){
     if(!word || /\s/.test(word)) return null;
     const ctrl = new AbortController();
-    const t = setTimeout(()=>ctrl.abort(), 8000);
+    const t = setTimeout(()=>ctrl.abort(), 12000);
     try{
       const res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word.toLowerCase()), {signal: ctrl.signal});
       clearTimeout(t);
