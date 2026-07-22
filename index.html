@@ -85,23 +85,11 @@ body::before{
 }
 .tab-btn{
   flex:1; border:none; background:transparent; color:var(--ink-soft);
-  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:12px;
-  padding:11px 4px; border-radius:999px; cursor:pointer;
-  display:flex; flex-direction:column; align-items:center; gap:4px;
-  transition:background .18s ease, color .18s ease, transform .18s ease;
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:13px;
+  padding:13px 4px; border-radius:999px; cursor:pointer;
+  transition:background .18s ease, color .18s ease;
 }
-.tab-btn .ic{ font-size:17px; line-height:1; }
 .tab-btn.active{ background:var(--accent-ghost); color:var(--accent-2); }
-/* Practice is the primary action — raise it like a floating hero button */
-.tab-btn:nth-child(3){
-  background:var(--hero-gradient); color:#1a1330;
-  width:60px; height:60px; flex:0 0 60px; border-radius:50%;
-  transform:translateY(-16px); box-shadow:0 14px 26px -10px rgba(155,140,251,.65), 0 0 0 5px var(--paper);
-  padding:0; gap:2px;
-}
-.tab-btn:nth-child(3) .ic{ font-size:19px; }
-.tab-btn:nth-child(3).active{ background:var(--hero-gradient); color:#1a1330; }
-.tab-btn:nth-child(3):active{ transform:translateY(-16px) scale(.94); }
 
 .view{ display:none; animation:fadeUp .28s ease; }
 .view.active{ display:block; }
@@ -171,6 +159,11 @@ input[type=text]::placeholder{ font-weight:500; color:var(--ink-soft); opacity:.
 .word-en{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:16.5px; }
 .word-tr{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; display:flex; gap:10px; flex-wrap:wrap; }
 .word-tr span b{ color:var(--ink); font-weight:600; }
+.lang-tag{
+  display:inline-block; font-size:10px; font-weight:800; letter-spacing:.04em;
+  color:var(--accent-2); background:var(--accent-ghost); border-radius:5px;
+  padding:2px 5px; margin-right:5px; vertical-align:1px;
+}
 .word-example{ font-style:italic; font-size:12px; color:var(--ink-soft); margin-top:6px; opacity:.85; }
 .box-dots{ display:flex; gap:3px; flex-shrink:0; }
 .box-dots i{ width:6px; height:6px; border-radius:50%; background:var(--line); display:block; }
@@ -189,11 +182,9 @@ input[type=text]::placeholder{ font-weight:500; color:var(--ink-soft); opacity:.
 .speak-btn:active{ transform:scale(.92); }
 .speak-btn-sm{ width:30px; height:30px; font-size:14px; }
 .empty-state{ text-align:center; padding:40px 10px; color:var(--ink-soft); }
-.empty-state .big{ font-size:38px; margin-bottom:8px; }
 
 /* Practice */
 .practice-intro{ text-align:center; padding:16px 6px 8px; }
-.practice-intro .big{ font-size:44px; margin-bottom:8px; }
 .practice-intro.hero{ background:var(--hero-gradient); color:#1a1330; border:none; }
 .practice-intro.hero .muted{ color:rgba(26,19,48,.72); }
 .progress-track{ height:8px; border-radius:999px; background:var(--paper-2); overflow:hidden; margin-bottom:22px; }
@@ -238,7 +229,6 @@ input[type=text]::placeholder{ font-weight:500; color:var(--ink-soft); opacity:.
 .feedback-bar .btn-primary.bad{ background:var(--wrong); color:#2b0f16; box-shadow:0 10px 24px -10px rgba(255,122,149,.55); }
 
 .session-end{ text-align:center; padding:28px 8px 6px; }
-.session-end .big{ font-size:52px; margin-bottom:6px; }
 .stat-pills{ display:flex; gap:8px; justify-content:center; margin:18px 0 6px; flex-wrap:wrap; }
 .pill{ background:var(--paper-2); border:1px solid var(--line); border-radius:999px; padding:9px 15px; font-size:12.5px; font-weight:700; }
 .pill b{ color:var(--accent-2); }
@@ -281,7 +271,7 @@ input[type=file]{ display:none; }
         <p>английский без нервов</p>
       </div>
     </div>
-    <div id="streakBadge" class="streak-badge zero"><span class="flame">🔥</span><span id="streakNum">0</span></div>
+    <div id="streakBadge" class="streak-badge zero"><span class="flame"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path d="M12 2c1 3-3 4-3 8a3 3 0 0 0 6 0c1 1 2 2.5 2 4.5A5 5 0 0 1 7 14.5C7 9 12 7 12 2z"/></svg></span><span id="streakNum">0</span></div>
   </div>
 
   <!-- ADD -->
@@ -306,8 +296,8 @@ input[type=file]{ display:none; }
       <input type="text" id="inExample" placeholder="She was reluctant to leave the party.">
 
       <div class="translate-row">
-        <button class="speak-btn" id="btnSpeakEn" title="Прослушать произношение" aria-label="Прослушать произношение">🔊</button>
-        <button class="btn btn-ghost btn-sm" id="btnTranslate" style="width:auto;">✨ Перевести и найти пример</button>
+        <button class="speak-btn" id="btnSpeakEn" title="Прослушать произношение" aria-label="Прослушать произношение"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></svg></button>
+        <button class="btn btn-ghost btn-sm" id="btnTranslate" style="width:auto;">Перевести и найти пример</button>
       </div>
 
       <div class="btn-block-row">
@@ -323,7 +313,7 @@ input[type=file]{ display:none; }
   <section id="view-words" class="view">
     <h2 class="section-title">Мои слова</h2>
     <div class="search-wrap">
-      <input type="text" id="searchWords" placeholder="🔍 Поиск по словам...">
+      <input type="text" id="searchWords" placeholder="Поиск по словам...">
     </div>
     <div class="card" id="wordsList"></div>
   </section>
@@ -356,7 +346,7 @@ input[type=file]{ display:none; }
 
     <div class="stat-grid">
       <div class="stat-box"><div class="stat-num" id="statTotal">0</div><div class="stat-lbl">всего слов</div></div>
-      <div class="stat-box"><div class="stat-num" id="statMastered">0</div><div class="stat-lbl">выучено ⭐</div></div>
+      <div class="stat-box"><div class="stat-num" id="statMastered">0</div><div class="stat-lbl">выучено</div></div>
       <div class="stat-box"><div class="stat-num" id="statStreak">0</div><div class="stat-lbl">дней подряд</div></div>
       <div class="stat-box"><div class="stat-num" id="statBest">0</div><div class="stat-lbl">лучшая серия</div></div>
     </div>
@@ -376,8 +366,8 @@ input[type=file]{ display:none; }
       <div class="muted">Слова хранятся в этом браузере и (если подключена синхронизация выше) в облаке. Время от времени можно делать экспорт как дополнительную подстраховку.</div>
       <div class="muted" id="lastSavedInfo" style="margin-top:8px;font-weight:700;"></div>
       <div class="io-row">
-        <button class="btn btn-outline" id="btnExport">⬇️ Экспорт</button>
-        <button class="btn btn-outline" id="btnImport">⬆️ Импорт</button>
+        <button class="btn btn-outline" id="btnExport">Экспорт</button>
+        <button class="btn btn-outline" id="btnImport">Импорт</button>
         <input type="file" id="fileImport" accept="application/json">
       </div>
     </div>
@@ -387,10 +377,10 @@ input[type=file]{ display:none; }
 
 <div class="tabbar">
   <div class="tabbar-inner">
-    <button class="tab-btn active" data-view="add"><span class="ic">➕</span>Добавить</button>
-    <button class="tab-btn" data-view="words"><span class="ic">📖</span>Слова</button>
-    <button class="tab-btn" data-view="practice"><span class="ic">🎯</span>Практика</button>
-    <button class="tab-btn" data-view="stats"><span class="ic">📈</span>Прогресс</button>
+    <button class="tab-btn active" data-view="add">Добавить</button>
+    <button class="tab-btn" data-view="words">Слова</button>
+    <button class="tab-btn" data-view="practice">Практика</button>
+    <button class="tab-btn" data-view="stats">Прогресс</button>
   </div>
 </div>
 
@@ -399,6 +389,10 @@ input[type=file]{ display:none; }
 <script type="module">
 (function(){
   "use strict";
+
+  /* ---------- Minimal single-colour icon set (no emoji) ---------- */
+  const ICON_SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></svg>';
+  const ICON_FLAME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path d="M12 2c1 3-3 4-3 8a3 3 0 0 0 6 0c1 1 2 2.5 2 4.5A5 5 0 0 1 7 14.5C7 9 12 7 12 2z"/></svg>';
 
   /* ---------- Cloud sync (Firebase) ----------
      Loaded lazily via dynamic import so that a blocked/unreachable
@@ -474,10 +468,10 @@ input[type=file]{ display:none; }
       localStorage.setItem(LS_LAST_SAVE, new Date().toISOString());
       const check = localStorage.getItem(LS_WORDS);
       if(!check || JSON.parse(check).length !== w.length){
-        toast('⚠️ Похоже, браузер не сохранил изменения — сделай экспорт на вкладке «Прогресс»');
+        toast('Похоже, браузер не сохранил изменения — сделай экспорт на вкладке «Прогресс»');
       }
     }catch(e){
-      toast('⚠️ Не получилось сохранить в этом браузере (возможно, режим приватного просмотра)');
+      toast('Не получилось сохранить в этом браузере (возможно, режим приватного просмотра)');
     }
     pushToCloud();
   }
@@ -507,12 +501,12 @@ input[type=file]{ display:none; }
     clearTimeout(pushTimer);
     pushTimer = setTimeout(async ()=>{
       const ok = await ensureFirebase();
-      if(!ok){ setSyncStatus('⚠️ Не получилось связаться с облаком — данные пока только локально'); return; }
+      if(!ok){ setSyncStatus('Не получилось связаться с облаком — данные пока только локально'); return; }
       try{
         await fb.setDoc(fb.doc(fb.db, 'vocab', syncCode), { words, stats, updatedAt: Date.now() });
-        setSyncStatus('✅ Синхронизировано только что');
+        setSyncStatus('Синхронизировано только что');
       }catch(e){
-        setSyncStatus('⚠️ Не получилось отправить в облако (проверь интернет)');
+        setSyncStatus('Не получилось отправить в облако (проверь интернет)');
       }
     }, 800);
   }
@@ -536,20 +530,20 @@ input[type=file]{ display:none; }
 
   async function subscribeSync(){
     const ok = await ensureFirebase();
-    if(!ok){ setSyncStatus('⚠️ Не получилось связаться с облаком — данные пока хранятся локально'); return; }
+    if(!ok){ setSyncStatus('Не получилось связаться с облаком — данные пока хранятся локально'); return; }
     fb.onSnapshot(fb.doc(fb.db, 'vocab', syncCode), (snap)=>{
       if(!snap.exists() || applyingRemote) return;
       refreshFromRemoteData(snap.data());
-    }, ()=>{ setSyncStatus('⚠️ Связь с облаком прервалась — данные пока хранятся локально'); });
+    }, ()=>{ setSyncStatus('Связь с облаком прервалась — данные пока хранятся локально'); });
   }
 
   async function connectSync(code){
     const trimmed = (code||'').trim();
     if(!trimmed){ toast('Введи код синхронизации'); return; }
-    setSyncStatus('⏳ Подключаюсь...');
+    setSyncStatus('Подключаюсь...');
     const ok = await ensureFirebase();
     if(!ok){
-      setSyncStatus('⚠️ Не получилось связаться с облаком — проверь интернет и попробуй ещё раз');
+      setSyncStatus('Не получилось связаться с облаком — проверь интернет и попробуй ещё раз');
       toast('Не получилось подключиться к синхронизации');
       return;
     }
@@ -560,10 +554,10 @@ input[type=file]{ display:none; }
       if(snap.exists()) refreshFromRemoteData(snap.data());
       await fb.setDoc(fb.doc(fb.db, 'vocab', syncCode), { words, stats, updatedAt: Date.now() });
       subscribeSync();
-      toast('Синхронизация подключена ✅');
+      toast('Синхронизация подключена');
       renderSyncUI();
     }catch(e){
-      setSyncStatus('⚠️ Не получилось подключиться — проверь код и интернет');
+      setSyncStatus('Не получилось подключиться — проверь код и интернет');
       toast('Не получилось подключиться к синхронизации');
     }
   }
@@ -581,7 +575,7 @@ input[type=file]{ display:none; }
     if(syncCode){
       area.innerHTML = `
         <div class="muted">Код синхронизации: <b style="color:var(--ink);">${esc(syncCode)}</b> — введи тот же код на другом устройстве, чтобы соединить их.</div>
-        <div class="muted" id="syncStatus" style="margin-top:6px;font-weight:700;">✅ Подключено</div>
+        <div class="muted" id="syncStatus" style="margin-top:6px;font-weight:700;">Подключено</div>
         <div class="btn-block-row"><button class="btn btn-outline" id="btnSyncOff">Отключить синхронизацию</button></div>`;
       document.getElementById('btnSyncOff').addEventListener('click', disconnectSync);
     }else{
@@ -766,7 +760,7 @@ input[type=file]{ display:none; }
     saveWords(words);
     inEn.value=''; inRu.value=''; inDa.value=''; inExample.value='';
     inEn.focus();
-    toast('Добавлено: '+en+' 🎉');
+    toast('Добавлено: '+en);
     renderRecent();
   });
   inEn.addEventListener('keydown', e=>{ if(e.key==='Enter') btnTranslate.click(); });
@@ -775,7 +769,7 @@ input[type=file]{ display:none; }
     const wrap = document.getElementById('recentList');
     const recent = words.slice(0,5);
     if(!recent.length){
-      wrap.innerHTML = '<div class="empty-state"><div class="big">🌱</div><div class="muted">Пока пусто. Добавь первое слово выше!</div></div>';
+      wrap.innerHTML = '<div class="empty-state"><div class="muted">Пока пусто. Добавь первое слово выше!</div></div>';
       return;
     }
     wrap.innerHTML = recent.map(w=>wordItemHtml(w,false)).join('');
@@ -786,8 +780,8 @@ input[type=file]{ display:none; }
   function wordItemHtml(w, showDots){
     const dots = showDots ? '<div class="box-dots">'+Array.from({length:MAX_BOX+1}).map((_,i)=>`<i class="${i<=w.box?'on':''}"></i>`).join('')+'</div>' : '';
     const tr = [];
-    if(w.ru) tr.push('<span>🇷🇺 <b>'+esc(w.ru)+'</b></span>');
-    if(w.da) tr.push('<span>🇩🇰 <b>'+esc(w.da)+'</b></span>');
+    if(w.ru) tr.push('<span><span class="lang-tag">RU</span><b>'+esc(w.ru)+'</b></span>');
+    if(w.da) tr.push('<span><span class="lang-tag">DA</span><b>'+esc(w.da)+'</b></span>');
     const exampleHtml = w.example ? `<div class="word-example">"${esc(w.example)}"</div>` : '';
     return `<div class="word-item" data-id="${w.id}">
       <div class="word-main">
@@ -796,7 +790,7 @@ input[type=file]{ display:none; }
         ${exampleHtml}
       </div>
       ${dots}
-      <button class="icon-btn" data-speak="${esc(w.en)}" title="Прослушать" aria-label="Прослушать произношение">🔊</button>
+      <button class="icon-btn" data-speak="${esc(w.en)}" title="Прослушать" aria-label="Прослушать произношение">${ICON_SPEAKER}</button>
       <button class="icon-btn" data-del="${w.id}" title="Удалить">✕</button>
     </div>`;
   }
@@ -829,7 +823,7 @@ input[type=file]{ display:none; }
       list = words.filter(w => w.en.toLowerCase().includes(q) || (w.ru||'').toLowerCase().includes(q) || (w.da||'').toLowerCase().includes(q));
     }
     if(!list.length){
-      wrap.innerHTML = `<div class="empty-state"><div class="big">📭</div><div class="muted">${words.length? 'Ничего не найдено' : 'Список пуст — добавь первое слово'}</div></div>`;
+      wrap.innerHTML = `<div class="empty-state"><div class="muted">${words.length? 'Ничего не найдено' : 'Список пуст — добавь первое слово'}</div></div>`;
       return;
     }
     wrap.innerHTML = list.map(w=>wordItemHtml(w,true)).join('');
@@ -850,7 +844,7 @@ input[type=file]{ display:none; }
     const area = document.getElementById('practiceArea');
     session = null;
     if(!words.length){
-      area.innerHTML = `<div class="card practice-intro"><div class="big">🫙</div>
+      area.innerHTML = `<div class="card practice-intro">
         <div class="muted">Сначала добавь несколько слов на вкладке «Добавить» — тогда здесь появится практика.</div></div>`;
       return;
     }
@@ -858,7 +852,6 @@ input[type=file]{ display:none; }
     if(due.length){
       const n = Math.min(due.length, SESSION_CAP);
       area.innerHTML = `<div class="card practice-intro hero">
-        <div class="big">🎯</div>
         <div style="font-weight:800;font-size:19px;margin-bottom:6px;">Сегодня на повторении: ${due.length} слов</div>
         <div class="muted">Сессия — примерно ${n} карточек, ~5 минут.</div>
         <div style="margin-top:18px;"><button class="btn btn-on-hero" id="btnStart">Начать практику</button></div>
@@ -866,7 +859,6 @@ input[type=file]{ display:none; }
       document.getElementById('btnStart').addEventListener('click', startSession);
     }else{
       area.innerHTML = `<div class="card practice-intro">
-        <div class="big">🎉</div>
         <div style="font-weight:800;font-size:19px;margin-bottom:6px;">На сегодня всё повторено!</div>
         <div class="muted">Возвращайся завтра — или потренируйся ещё немного просто так.</div>
         <div style="margin-top:18px;"><button class="btn btn-ghost" id="btnExtra">Потренироваться ещё</button></div>
@@ -942,7 +934,7 @@ input[type=file]{ display:none; }
     if(!availLangs.length){ session.queue.shift(); return renderQuiz(); }
     const lang = availLangs[Math.floor(Math.random()*availLangs.length)];
     const progressPct = Math.round((session.done/session.total)*100);
-    const langLabel = lang==='ru' ? '🇷🇺 русский' : '🇩🇰 датский';
+    const langLabel = lang==='ru' ? 'русский' : 'датский';
 
     const directionPool = word.example ? ['en2tr','tr2en','cloze'] : ['en2tr','tr2en'];
     let direction = directionPool[Math.floor(Math.random()*directionPool.length)];
@@ -964,7 +956,7 @@ input[type=file]{ display:none; }
         ${sentenceHtml}
         <div class="quiz-word-row">
           <div class="quiz-word">${esc(word.en)}</div>
-          <button class="speak-btn speak-btn-sm" id="btnSpeakWord" title="Прослушать" aria-label="Прослушать произношение">🔊</button>
+          <button class="speak-btn speak-btn-sm" id="btnSpeakWord" title="Прослушать" aria-label="Прослушать произношение">${ICON_SPEAKER}</button>
         </div>`;
     }else{
       correctVal = word.en;
@@ -1044,8 +1036,8 @@ input[type=file]{ display:none; }
       : `<div class="feedback-answer">Правильно: ${esc(correctText)}</div>`;
     bar.innerHTML = `<div class="feedback-inner">
       <div class="feedback-title-row">
-        <div class="feedback-title ${correct?'good':'bad'}">${correct?'✅ Верно!':'❌ Не в этот раз'}</div>
-        <button class="icon-btn speak-btn-sm" id="btnSpeakFeedback" title="Прослушать" aria-label="Прослушать произношение">🔊</button>
+        <div class="feedback-title ${correct?'good':'bad'}">${correct?'Верно!':'Не в этот раз'}</div>
+        <button class="icon-btn speak-btn-sm" id="btnSpeakFeedback" title="Прослушать" aria-label="Прослушать произношение">${ICON_SPEAKER}</button>
       </div>
       ${answerLine}
       <button class="btn btn-primary ${correct?'':'bad'}" id="btnContinue">Продолжить</button>
@@ -1068,12 +1060,11 @@ input[type=file]{ display:none; }
 
     const area = document.getElementById('practiceArea');
     area.innerHTML = `<div class="card session-end">
-      <div class="big">🏆</div>
       <div style="font-weight:800;font-size:22px;">Сессия завершена!</div>
       <div class="muted" style="margin-top:4px;">Так держать — по чуть-чуть каждый день и словарь растёт.</div>
       <div class="stat-pills">
-        <div class="pill">✅ верно: <b>${session.correctCount}</b></div>
-        <div class="pill">🔥 серия: <b>${stats.streak}</b> ${dayWord(stats.streak)}</div>
+        <div class="pill">верно: <b>${session.correctCount}</b></div>
+        <div class="pill">серия: <b>${stats.streak}</b> ${dayWord(stats.streak)}</div>
       </div>
       <div style="margin-top:16px;"><button class="btn btn-primary" id="btnBackHome">Готово</button></div>
     </div>`;
@@ -1122,7 +1113,7 @@ input[type=file]{ display:none; }
     fillEl.setAttribute('height', h);
     fillEl.setAttribute('y', y0 - h);
 
-    const labels = ['Новое','1 день','2 дня','4 дня','неделя','2 недели','Выучено ⭐'];
+    const labels = ['Новое','1 день','2 дня','4 дня','неделя','2 недели','Выучено'];
     const counts = labels.map((_,i)=> words.filter(w=>w.box===i).length);
     const maxC = Math.max(1, ...counts);
     document.getElementById('boxBars').innerHTML = counts.map((c,i)=>`
@@ -1136,7 +1127,7 @@ input[type=file]{ display:none; }
     const info = document.getElementById('lastSavedInfo');
     if(lastSaveRaw){
       const d = new Date(lastSaveRaw);
-      info.textContent = `✅ Сохранено в этом браузере: ${total} слов · ${pad(d.getDate())}.${pad(d.getMonth()+1)} в ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      info.textContent = `Сохранено в этом браузере: ${total} слов · ${pad(d.getDate())}.${pad(d.getMonth()+1)} в ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }else{
       info.textContent = total ? '' : 'Пока нечего сохранять.';
     }
