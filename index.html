@@ -368,8 +368,13 @@ input[type=file]{ display:none; }
     </div>
 
     <div class="card" style="margin-top:16px;">
+      <label style="margin:0 0 6px;">Синхронизация между устройствами</label>
+      <div id="syncArea"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
       <label style="margin:0 0 6px;">Резервная копия</label>
-      <div class="muted">Все слова хранятся только в этом браузере, на этом устройстве и по этой ссылке. Открывай всегда одну и ту же ссылку и время от времени делай экспорт, чтобы не потерять список.</div>
+      <div class="muted">Слова хранятся в этом браузере и (если подключена синхронизация выше) в облаке. Время от времени можно делать экспорт как дополнительную подстраховку.</div>
       <div class="muted" id="lastSavedInfo" style="margin-top:8px;font-weight:700;"></div>
       <div class="io-row">
         <button class="btn btn-outline" id="btnExport">⬇️ Экспорт</button>
@@ -392,9 +397,48 @@ input[type=file]{ display:none; }
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
 (function(){
   "use strict";
+
+  /* ---------- Cloud sync (Firebase) ----------
+     Loaded lazily via dynamic import so that a blocked/unreachable
+     CDN (flaky network, ad-blocker, offline) never breaks the rest
+     of the app — the app must keep working fully offline/local. */
+  const firebaseConfig = {
+    apiKey: "AIzaSyDJEk7mhuDk0t_QqFEUYrtxlDZpuWKNH74",
+    authDomain: "kopilka-slov.firebaseapp.com",
+    projectId: "kopilka-slov",
+    storageBucket: "kopilka-slov.firebasestorage.app",
+    messagingSenderId: "906258652044",
+    appId: "1:906258652044:web:af8c6ff7809520097f14a9",
+    measurementId: "G-8VJYC8M2ZE"
+  };
+  let fb = null; // { doc, getDoc, setDoc, onSnapshot, db }
+  let firebaseReady = false;
+  let firebaseLoadFailed = false;
+  async function ensureFirebase(){
+    if(firebaseReady) return true;
+    if(firebaseLoadFailed) return false;
+    try{
+      const [{ initializeApp }, { getFirestore, doc, getDoc, setDoc, onSnapshot }] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js")
+      ]);
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      fb = { doc, getDoc, setDoc, onSnapshot, db };
+      firebaseReady = true;
+      return true;
+    }catch(e){
+      firebaseLoadFailed = true;
+      return false;
+    }
+  }
+  const LS_SYNC_CODE = 'evt_sync_code';
+  let syncCode = localStorage.getItem(LS_SYNC_CODE) || '';
+  let applyingRemote = false;
+  let pushTimer;
 
   /* ---------- Data layer ---------- */
   const LS_WORDS = 'evt_words_v1';
@@ -436,6 +480,7 @@ input[type=file]{ display:none; }
     }catch(e){
       toast('⚠️ Не получилось сохранить в этом браузере (возможно, режим приватного просмотра)');
     }
+    pushToCloud();
   }
 
   function loadStats(){
@@ -443,7 +488,114 @@ input[type=file]{ display:none; }
       return Object.assign({streak:0, best:0, lastPractice:null, sessions:0}, JSON.parse(localStorage.getItem(LS_STATS)) || {});
     }catch(e){ return {streak:0, best:0, lastPractice:null, sessions:0}; }
   }
-  function saveStats(s){ localStorage.setItem(LS_STATS, JSON.stringify(s)); }
+  function saveStats(s){ localStorage.setItem(LS_STATS, JSON.stringify(s)); pushToCloud(); }
+
+  /* ---------- Cloud sync logic ---------- */
+  function mergeWordLists(localList, remoteList){
+    const map = new Map();
+    localList.forEach(w => map.set(w.en.toLowerCase(), w));
+    (remoteList||[]).forEach(rw => {
+      if(!rw || !rw.en) return;
+      const key = rw.en.toLowerCase();
+      const existing = map.get(key);
+      if(!existing || (rw.box||0) > (existing.box||0)) map.set(key, rw);
+    });
+    return Array.from(map.values());
+  }
+
+  function pushToCloud(){
+    if(!syncCode || applyingRemote) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(async ()=>{
+      const ok = await ensureFirebase();
+      if(!ok){ setSyncStatus('⚠️ Не получилось связаться с облаком — данные пока только локально'); return; }
+      try{
+        await fb.setDoc(fb.doc(fb.db, 'vocab', syncCode), { words, stats, updatedAt: Date.now() });
+        setSyncStatus('✅ Синхронизировано только что');
+      }catch(e){
+        setSyncStatus('⚠️ Не получилось отправить в облако (проверь интернет)');
+      }
+    }, 800);
+  }
+
+  function setSyncStatus(text){
+    const el = document.getElementById('syncStatus');
+    if(el) el.textContent = text;
+  }
+
+  function refreshFromRemoteData(remote){
+    applyingRemote = true;
+    words = mergeWordLists(words, remote.words || []);
+    stats = Object.assign({}, stats, remote.stats || {});
+    saveWords(words);
+    saveStats(stats);
+    applyingRemote = false;
+    renderRecent();
+    if(document.getElementById('view-words').classList.contains('active')) renderWordsList();
+    if(document.getElementById('view-stats').classList.contains('active')) renderStats();
+  }
+
+  async function subscribeSync(){
+    const ok = await ensureFirebase();
+    if(!ok){ setSyncStatus('⚠️ Не получилось связаться с облаком — данные пока хранятся локально'); return; }
+    fb.onSnapshot(fb.doc(fb.db, 'vocab', syncCode), (snap)=>{
+      if(!snap.exists() || applyingRemote) return;
+      refreshFromRemoteData(snap.data());
+    }, ()=>{ setSyncStatus('⚠️ Связь с облаком прервалась — данные пока хранятся локально'); });
+  }
+
+  async function connectSync(code){
+    const trimmed = (code||'').trim();
+    if(!trimmed){ toast('Введи код синхронизации'); return; }
+    setSyncStatus('⏳ Подключаюсь...');
+    const ok = await ensureFirebase();
+    if(!ok){
+      setSyncStatus('⚠️ Не получилось связаться с облаком — проверь интернет и попробуй ещё раз');
+      toast('Не получилось подключиться к синхронизации');
+      return;
+    }
+    syncCode = trimmed;
+    localStorage.setItem(LS_SYNC_CODE, syncCode);
+    try{
+      const snap = await fb.getDoc(fb.doc(fb.db, 'vocab', syncCode));
+      if(snap.exists()) refreshFromRemoteData(snap.data());
+      await fb.setDoc(fb.doc(fb.db, 'vocab', syncCode), { words, stats, updatedAt: Date.now() });
+      subscribeSync();
+      toast('Синхронизация подключена ✅');
+      renderSyncUI();
+    }catch(e){
+      setSyncStatus('⚠️ Не получилось подключиться — проверь код и интернет');
+      toast('Не получилось подключиться к синхронизации');
+    }
+  }
+
+  function disconnectSync(){
+    syncCode = '';
+    localStorage.removeItem(LS_SYNC_CODE);
+    renderSyncUI();
+    toast('Синхронизация отключена, слова остались на этом устройстве');
+  }
+
+  function renderSyncUI(){
+    const area = document.getElementById('syncArea');
+    if(!area) return;
+    if(syncCode){
+      area.innerHTML = `
+        <div class="muted">Код синхронизации: <b style="color:var(--ink);">${esc(syncCode)}</b> — введи тот же код на другом устройстве, чтобы соединить их.</div>
+        <div class="muted" id="syncStatus" style="margin-top:6px;font-weight:700;">✅ Подключено</div>
+        <div class="btn-block-row"><button class="btn btn-outline" id="btnSyncOff">Отключить синхронизацию</button></div>`;
+      document.getElementById('btnSyncOff').addEventListener('click', disconnectSync);
+    }else{
+      area.innerHTML = `
+        <div class="muted">Придумай любой код (можно просто слово) и введи его на всех устройствах — слова будут одинаковыми везде.</div>
+        <div class="row" style="margin-top:12px;">
+          <input type="text" id="inSyncCode" placeholder="например: julia2026">
+        </div>
+        <div class="btn-block-row"><button class="btn btn-primary" id="btnSyncOn">Подключить синхронизацию</button></div>
+        <div class="muted" id="syncStatus" style="margin-top:6px;font-weight:700;"></div>`;
+      document.getElementById('btnSyncOn').addEventListener('click', ()=> connectSync(document.getElementById('inSyncCode').value));
+    }
+  }
 
   let words = loadWords();
   let stats = loadStats();
@@ -485,7 +637,7 @@ input[type=file]{ display:none; }
       b.classList.toggle('active', b.dataset.view===name);
     });
     if(name==='words') renderWordsList();
-    if(name==='stats') renderStats();
+    if(name==='stats'){ renderStats(); renderSyncUI(); }
     if(name==='practice') renderPracticeHome();
     if(name==='add') renderRecent();
   }
@@ -1037,6 +1189,7 @@ input[type=file]{ display:none; }
   renderHeaderStreak();
   renderRecent();
   showView('add');
+  if(syncCode) subscribeSync();
 })();
 </script>
 </body>
