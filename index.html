@@ -666,10 +666,53 @@ input[type=file]{ display:none; }
     speak(word, 'en-US');
   });
 
-  /* Returns several candidate translations (not just the single "best" guess),
+  /* Returns several candidate translations (not just one "best" guess),
      since machine translation of a lone word is often wrong — the user picks
-     whichever fits, or types their own. */
-  async function translateCandidatesAttempt(text, lang){
+     whichever fits, or types their own.
+     Primary source is Google Translate's public engine (much higher quality
+     than a translation-memory service for single words), with a
+     translation-memory service kept only as a fallback if Google is
+     unreachable. */
+  function pushUnique(list, seen, val){
+    const clean = (val||'').trim();
+    if(!clean) return;
+    const key = clean.toLowerCase();
+    if(seen.has(key)) return;
+    seen.add(key); list.push(clean);
+  }
+
+  async function fetchGoogleTranslateAttempt(text, lang){
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), 12000);
+    try{
+      const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl='+lang+'&dt=t&dt=bd&q='+encodeURIComponent(text);
+      const res = await fetch(url, {signal: ctrl.signal});
+      clearTimeout(t);
+      if(!res.ok) return [];
+      const data = await res.json();
+      const seen = new Set();
+      const out = [];
+      if(Array.isArray(data) && Array.isArray(data[0])){
+        const sentence = data[0].map(seg => Array.isArray(seg) ? (seg[0]||'') : '').join('');
+        pushUnique(out, seen, sentence);
+      }
+      try{
+        if(Array.isArray(data) && Array.isArray(data[1])){
+          data[1].forEach(entry=>{
+            if(Array.isArray(entry) && Array.isArray(entry[1])){
+              entry[1].forEach(w=>{ if(typeof w === 'string') pushUnique(out, seen, w); });
+            }
+          });
+        }
+      }catch(e){ /* dictionary section shape varies — sentence translation above still stands */ }
+      return out.slice(0, 5);
+    }catch(e){
+      clearTimeout(t);
+      return [];
+    }
+  }
+
+  async function fetchMyMemoryAttempt(text, lang){
     const ctrl = new AbortController();
     const t = setTimeout(()=>ctrl.abort(), 12000);
     try{
@@ -678,25 +721,25 @@ input[type=file]{ display:none; }
       clearTimeout(t);
       const seen = new Set();
       const out = [];
-      const push = (val)=>{
-        const clean = (val||'').trim();
-        if(!clean || /invalid|error/i.test(clean)) return;
-        const key = clean.toLowerCase();
-        if(seen.has(key)) return;
-        seen.add(key); out.push(clean);
-      };
-      push(data && data.responseData && data.responseData.translatedText);
+      const primary = data && data.responseData && data.responseData.translatedText;
+      if(primary && !/invalid|error/i.test(primary)) pushUnique(out, seen, primary);
       const matches = Array.isArray(data && data.matches) ? data.matches.slice() : [];
       matches.sort((a,b)=> (b.quality||b.match||0) - (a.quality||a.match||0));
       for(const m of matches){
         if(out.length >= 4) break;
-        if(m && Number(m.quality||m.match*100||0) >= 55) push(m.translation);
+        if(m && Number(m.quality||m.match*100||0) >= 55) pushUnique(out, seen, m.translation);
       }
       return out;
     }catch(e){
       clearTimeout(t);
       return [];
     }
+  }
+
+  async function translateCandidatesAttempt(text, lang){
+    const fromGoogle = await fetchGoogleTranslateAttempt(text, lang);
+    if(fromGoogle.length) return fromGoogle;
+    return fetchMyMemoryAttempt(text, lang);
   }
   async function translateCandidates(text, lang){
     const first = await translateCandidatesAttempt(text, lang);
