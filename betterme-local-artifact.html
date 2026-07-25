@@ -1,0 +1,1351 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BetterMe Local – Private Workout Coach</title>
+<style>
+  :root {
+    --bg: #ECE5D6;
+    --cream: #F6F1E7;
+    --card: #FFFFFF;
+    --ink: #221E19;
+    --pose-ink: var(--ink);
+    --muted: #8C8271;
+    --line: #E4DCC9;
+    --accent-dark: #201C17;
+    --green: #4C9A6A;
+    --green-soft: #E6F1EA;
+    --pilates-bg: #EFE3D8;
+    --pilates-fg: #7A5A3A;
+    --cali-bg: #E7ECE3;
+    --cali-fg: #4B5D46;
+    --yoga-bg: #E9F1EC;
+    --yoga-fg: #3E6B57;
+    --radius-sm: 10px;
+    --radius-md: 18px;
+    --radius-lg: 28px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    font-family: var(--font);
+    color: var(--ink);
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px 48px;
+    gap: 16px;
+  }
+  .app-banner {
+    text-align: center;
+    max-width: 420px;
+  }
+  .app-banner h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.2px; }
+  .app-banner p { font-size: 12.5px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+  .phone {
+    width: 390px;
+    max-width: 100%;
+    height: 780px;
+    background: var(--cream);
+    border-radius: 40px;
+    border: 10px solid #16130F;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.35);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    position: relative;
+  }
+  .screen {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+  .screen.active { display: flex; }
+
+  .scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 20px 12px;
+  }
+  .scroll::-webkit-scrollbar { width: 0; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 6px;
+  }
+  .topbar h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .topbar .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .icon-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: var(--card);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    display: block;
+    width: 100%;
+    background: var(--accent-dark);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 15px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+  }
+  .btn-primary:active { opacity: 0.85; }
+  .btn-secondary {
+    display: block;
+    width: 100%;
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    padding: 13px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+  }
+  .btn-danger {
+    display: block;
+    width: 100%;
+    background: transparent;
+    color: #B5473B;
+    border: 1.5px solid #EAD3CE;
+    border-radius: 999px;
+    padding: 13px 20px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Onboarding */
+  .onb-step { display: none; flex-direction: column; gap: 14px; padding: 28px 22px; height: 100%; }
+  .onb-step.active { display: flex; }
+  .onb-title { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 2px; }
+  .onb-sub { font-size: 13px; color: var(--muted); margin-bottom: 8px; line-height: 1.5; }
+  .onb-options { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .option-card {
+    background: var(--card);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .option-card.selected { border-color: var(--accent-dark); }
+  .option-card .emoji { font-size: 22px; width: 30px; text-align: center; }
+  .option-card .label { font-weight: 600; font-size: 14.5px; }
+  .option-card .desc { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .progress-dots-onb { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
+  .progress-dots-onb span { width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
+  .progress-dots-onb span.done { background: var(--accent-dark); }
+
+  /* Today screen */
+  .today-card {
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .zone-chip {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    align-self: flex-start;
+  }
+  .zone-chip.Pilates { background: var(--pilates-bg); color: var(--pilates-fg); }
+  .zone-chip.Calisthenics { background: var(--cali-bg); color: var(--cali-fg); }
+  .zone-chip.ChairYoga { background: var(--yoga-bg); color: var(--yoga-fg); }
+  .zone-chip.RestDay { background: var(--line); color: var(--muted); }
+  .today-illustration {
+    width: 100%;
+    height: 130px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 52px;
+  }
+  .today-illustration.Pilates { background: var(--pilates-bg); }
+  .today-illustration.Calisthenics { background: var(--cali-bg); }
+  .today-illustration.ChairYoga { background: var(--yoga-bg); }
+  .today-illustration.RestDay { background: var(--line); }
+  .today-title { font-size: 18px; font-weight: 700; letter-spacing: -0.2px; }
+  .today-meta { font-size: 12.5px; color: var(--muted); }
+
+  .section-label { font-size: 13px; font-weight: 700; color: var(--ink); margin: 4px 0 10px; }
+  .day-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .day-pill {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 8px 4px 10px;
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+  }
+  .day-pill.current { border-color: var(--accent-dark); }
+  .day-pill .num { font-size: 10.5px; color: var(--muted); font-weight: 600; }
+  .day-pill .mark { font-size: 17px; margin-top: 3px; }
+  .day-pill.done .mark { color: var(--green); }
+  .day-pill.rest .mark { color: var(--muted); }
+  .day-pill.upcoming .mark { color: var(--line); }
+
+  .streak-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .stat-box {
+    flex: 1;
+    background: var(--card);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-box .n { font-size: 19px; font-weight: 700; }
+  .stat-box .l { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+  /* Library */
+  .cat-tabs { display: flex; gap: 8px; padding: 0 20px 14px; }
+  .cat-tab {
+    flex: 1;
+    text-align: center;
+    padding: 9px 4px;
+    border-radius: 999px;
+    background: var(--card);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .cat-tab.active { background: var(--accent-dark); color: #fff; }
+  .workout-card {
+    background: var(--card);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .workout-card .ic {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .workout-card .info { flex: 1; min-width: 0; }
+  .workout-card .info .n { font-weight: 600; font-size: 14px; }
+  .workout-card .info .m { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .workout-card .chev { color: var(--muted); font-size: 16px; }
+
+  /* Detail */
+  .detail-illustration {
+    width: 100%;
+    height: 190px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 70px;
+  }
+  .detail-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; flex: 1; min-height: 0; }
+  .detail-title { font-size: 21px; font-weight: 700; letter-spacing: -0.3px; }
+  .detail-meta { font-size: 13px; color: var(--muted); }
+  .exercise-list { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; }
+  .exercise-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--card); border-radius: 12px; padding: 10px 12px;
+  }
+  .exercise-row .e { font-size: 18px; width: 26px; text-align: center; }
+  .exercise-row .name { flex: 1; font-size: 13px; font-weight: 600; }
+  .exercise-row .dur { font-size: 11.5px; color: var(--muted); }
+
+  /* Player */
+  .player { background: var(--ink); color: #fff; height: 100%; display: flex; flex-direction: column; --pose-ink: var(--muted); }
+  .player .ptop { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 8px; }
+  .player .close-btn {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.12); color: #fff; font-size: 14px; cursor: pointer;
+  }
+  .dots { display: flex; gap: 5px; padding: 0 20px 14px; flex-wrap: wrap; }
+  .dots span { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.18); }
+  .dots span.done { background: #fff; }
+  .dots span.now { background: rgba(255,255,255,0.6); }
+  .player-mid { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 0 20px; text-align: center; }
+  .player-emoji { font-size: 64px; }
+  .player-state { font-size: 12.5px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.55); font-weight: 700; }
+  .player-name { font-size: 22px; font-weight: 700; letter-spacing: -0.2px; }
+  .player-stats { display: flex; align-items: center; justify-content: space-between; padding: 6px 26px 18px; }
+  .player-stats .col { text-align: center; flex: 1; }
+  .player-stats .col .v { font-size: 13px; font-weight: 700; }
+  .player-stats .col .k { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .player-stats .timer { font-size: 34px; font-weight: 700; flex: 1.3; }
+  .player-controls { display: flex; align-items: center; justify-content: center; gap: 22px; padding: 4px 20px 18px; }
+  .ctrl-btn {
+    background: rgba(255,255,255,0.1);
+    border: none; color: #fff; border-radius: 999px;
+    padding: 12px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .ctrl-btn.play { background: #fff; color: var(--ink); padding: 14px 26px; }
+  .player-next { margin: 0 20px 22px; background: rgba(255,255,255,0.08); border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+  .player-next .e { font-size: 20px; }
+  .player-next .t { font-size: 11px; color: rgba(255,255,255,0.5); }
+  .player-next .n { font-size: 13px; font-weight: 600; }
+
+  /* Complete screen */
+  .complete-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 30px; text-align: center; }
+  .complete-wrap .big-emoji { font-size: 56px; margin-bottom: 6px; }
+  .complete-wrap h2 { font-size: 22px; font-weight: 700; }
+  .complete-wrap p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .complete-stats { display: flex; gap: 14px; margin: 20px 0 28px; width: 100%; }
+  .complete-actions { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+
+  /* Progress */
+  .streak-hero { background: var(--card); border-radius: var(--radius-lg); padding: 20px; text-align: center; margin-bottom: 16px; }
+  .streak-hero .flame { font-size: 34px; }
+  .streak-hero .n { font-size: 30px; font-weight: 800; margin-top: 4px; }
+  .streak-hero .l { font-size: 12px; color: var(--muted); }
+  .progress-days { display: flex; flex-direction: column; gap: 8px; }
+  .prog-row { display: flex; align-items: center; gap: 10px; background: var(--card); border-radius: 12px; padding: 10px 12px; }
+  .prog-row .mk { width: 22px; text-align: center; font-size: 15px; }
+  .prog-row .txt { flex: 1; font-size: 12.5px; }
+  .prog-row .txt .n { font-weight: 600; }
+  .prog-row .txt .s { color: var(--muted); font-size: 11px; }
+
+  /* Profile */
+  .profile-card { background: var(--card); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; }
+  .profile-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; border-bottom: 1px solid var(--line); }
+  .profile-row:last-child { border-bottom: none; }
+  .profile-row .k { color: var(--muted); }
+  .profile-row .v { font-weight: 600; }
+  .privacy-note { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.6; margin-top: 14px; }
+
+  /* Bottom nav */
+  .nav-bar {
+    display: none;
+    border-top: 1px solid var(--line);
+    background: var(--cream);
+    padding: 10px 8px 16px;
+    gap: 4px;
+  }
+  .nav-bar.visible { display: flex; }
+  .nav-item {
+    flex: 1;
+    background: none; border: none;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  .nav-item .ic { font-size: 18px; }
+  .nav-item.active { color: var(--ink); }
+</style>
+
+  <div class="app-banner">
+    <h1>BetterMe Local</h1>
+    <p>A private, offline home-workout coach inspired by BetterMe's app-store flow.<br>Everything below runs from this one HTML file — no server, no account, no network calls. All data stays in your browser's local storage.</p>
+  </div>
+
+  <div class="phone">
+    <div class="phone-screen">
+
+      <!-- ONBOARDING -->
+      <div class="screen" id="screen-onboarding">
+        <div class="onb-step active" data-step="0">
+          <div class="onb-title">Welcome to BetterMe Local</div>
+          <div class="onb-sub">Pilates, calisthenics and chair yoga — a personalized plan generated and stored only on this device.</div>
+          <div style="flex:1"></div>
+          <button class="btn-primary" onclick="onbNext()">Get started</button>
+        </div>
+
+        <div class="onb-step" data-step="1">
+          <div class="onb-title">What's your goal?</div>
+          <div class="onb-sub">This shapes the mix of workouts in your plan.</div>
+          <div class="onb-options" id="onb-goals"></div>
+          <div class="progress-dots-onb"><span class="done"></span><span></span><span></span><span></span></div>
+        </div>
+
+        <div class="onb-step" data-step="2">
+          <div class="onb-title">Your level?</div>
+          <div class="onb-sub">Adjusts how long each exercise round lasts.</div>
+          <div class="onb-options" id="onb-levels"></div>
+          <div class="progress-dots-onb"><span class="done"></span><span class="done"></span><span></span><span></span></div>
+        </div>
+
+        <div class="onb-step" data-step="3">
+          <div class="onb-title">Days per week?</div>
+          <div class="onb-sub">How often you want to train.</div>
+          <div class="onb-options" id="onb-days"></div>
+          <div class="progress-dots-onb"><span class="done"></span><span class="done"></span><span class="done"></span><span></span></div>
+        </div>
+
+        <div class="onb-step" data-step="4">
+          <div class="onb-title">Your plan is ready</div>
+          <div class="onb-sub" id="onb-summary"></div>
+          <div style="flex:1"></div>
+          <button class="btn-primary" onclick="finishOnboarding()">Start training</button>
+        </div>
+      </div>
+
+      <!-- TODAY -->
+      <div class="screen" id="screen-today">
+        <div class="topbar">
+          <div>
+            <h2>Today</h2>
+            <div class="sub" id="today-datesub"></div>
+          </div>
+          <button class="icon-btn" onclick="show('screen-profile')">⚙️</button>
+        </div>
+        <div class="scroll" id="today-content"></div>
+      </div>
+
+      <!-- LIBRARY -->
+      <div class="screen" id="screen-library">
+        <div class="topbar"><div><h2>Workouts</h2><div class="sub">Browse the full library</div></div></div>
+        <div class="cat-tabs" id="lib-tabs"></div>
+        <div class="scroll" id="lib-content"></div>
+      </div>
+
+      <!-- DETAIL -->
+      <div class="screen" id="screen-detail">
+        <div class="detail-illustration" id="detail-illustration"></div>
+        <div class="detail-body">
+          <button class="icon-btn" style="position:absolute; top:16px; left:16px;" onclick="backFromDetail()">←</button>
+          <span class="zone-chip" id="detail-chip"></span>
+          <div class="detail-title" id="detail-title"></div>
+          <div class="detail-meta" id="detail-meta"></div>
+          <div class="exercise-list" id="detail-exercises"></div>
+          <button class="btn-primary" onclick="startPlayer()">Start Workout</button>
+        </div>
+      </div>
+
+      <!-- PLAYER -->
+      <div class="screen" id="screen-player">
+        <div class="player">
+          <div class="ptop">
+            <button class="close-btn" onclick="closePlayer()">✕</button>
+            <div style="font-size:12px; opacity:0.6;" id="player-workout-name"></div>
+            <div style="width:32px;"></div>
+          </div>
+          <div class="dots" id="player-dots"></div>
+          <div class="player-mid">
+            <div class="player-emoji" id="player-emoji"></div>
+            <div class="player-state" id="player-state"></div>
+            <div class="player-name" id="player-name"></div>
+          </div>
+          <div class="player-stats">
+            <div class="col"><div class="v" id="player-elapsed">00:00</div><div class="k">ELAPSED</div></div>
+            <div class="timer" id="player-timer">0:00</div>
+            <div class="col"><div class="v" id="player-cal">0</div><div class="k">CAL</div></div>
+          </div>
+          <div class="player-next" id="player-next"></div>
+          <div class="player-controls">
+            <button class="ctrl-btn" onclick="playerPrev()">◀ Prev</button>
+            <button class="ctrl-btn play" id="player-playbtn" onclick="playerToggle()">Pause</button>
+            <button class="ctrl-btn" onclick="playerNext()">Next ▶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPLETE -->
+      <div class="screen" id="screen-complete">
+        <div class="complete-wrap">
+          <div class="big-emoji">🎉</div>
+          <h2>Workout complete!</h2>
+          <p>Nice work — that's another one logged, fully offline.</p>
+          <div class="complete-stats">
+            <div class="stat-box"><div class="n" id="complete-time">0:00</div><div class="l">TIME</div></div>
+            <div class="stat-box"><div class="n" id="complete-cal">0</div><div class="l">CAL</div></div>
+            <div class="stat-box"><div class="n" id="complete-streak">0</div><div class="l">STREAK</div></div>
+          </div>
+          <div class="complete-actions">
+            <button class="btn-primary" onclick="finishComplete()">Back to plan</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="screen" id="screen-progress">
+        <div class="topbar"><div><h2>Progress</h2><div class="sub">Your all-time stats</div></div></div>
+        <div class="scroll" id="progress-content"></div>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="screen" id="screen-profile">
+        <div class="topbar"><div><h2>Profile</h2><div class="sub">Plan settings &amp; data</div></div></div>
+        <div class="scroll" id="profile-content"></div>
+      </div>
+
+    </div>
+
+    <div class="nav-bar" id="nav-bar">
+      <button class="nav-item" data-tab="screen-today" onclick="show('screen-today')"><span class="ic">🏠</span>Today</button>
+      <button class="nav-item" data-tab="screen-library" onclick="show('screen-library')"><span class="ic">📚</span>Library</button>
+      <button class="nav-item" data-tab="screen-progress" onclick="show('screen-progress')"><span class="ic">📈</span>Progress</button>
+      <button class="nav-item" data-tab="screen-profile" onclick="show('screen-profile')"><span class="ic">👤</span>Profile</button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "betterme_local_v1";
+
+  /* ---------------- Exercise & workout library ---------------- */
+
+  var CAT_CLASS = { Pilates: "Pilates", Calisthenics: "Calisthenics", "Chair Yoga": "ChairYoga" };
+  var CAT_TOP = { Pilates: "var(--pilates-fg)", Calisthenics: "var(--cali-fg)", "Chair Yoga": "var(--yoga-fg)" };
+  var CAT_SOFT = { Pilates: "var(--pilates-bg)", Calisthenics: "var(--cali-bg)", "Chair Yoga": "var(--yoga-bg)" };
+  var CAT_HERO_POSE = { Pilates: "flex", Calisthenics: "fullbody", "Chair Yoga": "rest" };
+  var ZONE_POSE = { Legs: "legs", Arms: "arms", Core: "core", "Full Body": "fullbody", Flexibility: "flex" };
+
+  /* Small illustrated character (face, pigtails, filled outlined limbs, shoes)
+     built from primitives so every pose reuses the app's existing palette —
+     "top" is the shirt/bra color, "soft" is the shorts tint, both already
+     defined per category above. Arms and legs stay bare (cream, like skin)
+     rather than fully covered, matching a shorts+bra silhouette. No new
+     illustration colors are introduced. */
+  function capsule(x1, y1, x2, y2, w, fill) {
+    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="var(--pose-ink)" stroke-width="' + (w + 4) + '" stroke-linecap="round"/>' +
+      '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + fill + '" stroke-width="' + w + '" stroke-linecap="round"/>';
+  }
+  function jointDot(cx, cy, w, fill) {
+    return '<circle cx="' + cx + '" cy="' + cy + '" r="' + (w / 2 + 2) + '" fill="var(--pose-ink)"/><circle cx="' + cx + '" cy="' + cy + '" r="' + (w / 2) + '" fill="' + fill + '"/>';
+  }
+  function poseHead(cx, cy, r) {
+    return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="var(--cream)" stroke="var(--pose-ink)" stroke-width="3"/>';
+  }
+  function poseBangs(cx, cy, r) {
+    return '<path d="M' + (cx - r * 1.05) + ' ' + (cy - r * 0.1) + ' Q' + (cx - r * 1.15) + ' ' + (cy - r * 1.35) + ' ' + cx + ' ' + (cy - r * 1.4) +
+      ' Q' + (cx + r * 1.15) + ' ' + (cy - r * 1.35) + ' ' + (cx + r * 1.05) + ' ' + (cy - r * 0.1) +
+      ' Q' + (cx + r * 0.85) + ' ' + (cy - r * 0.55) + ' ' + cx + ' ' + (cy - r * 0.6) +
+      ' Q' + (cx - r * 0.85) + ' ' + (cy - r * 0.55) + ' ' + (cx - r * 1.05) + ' ' + (cy - r * 0.1) + ' Z" fill="var(--pose-ink)"/>';
+  }
+  function posePigtail(cx, cy, r, dir) {
+    var bx = cx + dir * r * 0.95, by = cy + r * 0.25;
+    return '<circle cx="' + bx + '" cy="' + by + '" r="4.2" fill="var(--pose-ink)"/>' +
+      '<circle cx="' + (bx + dir * 1.5) + '" cy="' + (by + 5.5) + '" r="3.3" fill="var(--pose-ink)"/>';
+  }
+  function poseFace(cx, cy, r, accent) {
+    var ex = r * 0.4;
+    return '<path d="M' + (cx - ex - 3) + ' ' + (cy + 0.5) + ' Q' + (cx - ex) + ' ' + (cy - 3.2) + ' ' + (cx - ex + 3) + ' ' + (cy + 0.5) + '" stroke="var(--pose-ink)" stroke-width="1.7" fill="none" stroke-linecap="round"/>' +
+      '<path d="M' + (cx + ex - 3) + ' ' + (cy + 0.5) + ' Q' + (cx + ex) + ' ' + (cy - 3.2) + ' ' + (cx + ex + 3) + ' ' + (cy + 0.5) + '" stroke="var(--pose-ink)" stroke-width="1.7" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="' + (cx - r * 0.72) + '" cy="' + (cy + r * 0.42) + '" r="2.1" fill="' + accent + '" opacity="0.5"/>' +
+      '<circle cx="' + (cx + r * 0.72) + '" cy="' + (cy + r * 0.42) + '" r="2.1" fill="' + accent + '" opacity="0.5"/>' +
+      '<path d="M' + (cx - r * 0.3) + ' ' + (cy + r * 0.38) + ' Q' + cx + ' ' + (cy + r * 0.6) + ' ' + (cx + r * 0.3) + ' ' + (cy + r * 0.38) + '" stroke="var(--pose-ink)" stroke-width="1.8" fill="none" stroke-linecap="round"/>';
+  }
+  function poseTorso(x, y, w, h, rx, fill, rot, rcx, rcy) {
+    var t = rot ? ' transform="rotate(' + rot + ' ' + rcx + ' ' + rcy + ')"' : "";
+    return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + rx + '" fill="' + fill + '" stroke="var(--pose-ink)" stroke-width="2.5"' + t + "/>";
+  }
+  function poseShoe(cx, cy, angle) {
+    return '<g transform="rotate(' + angle + ' ' + cx + ' ' + cy + ')">' +
+      '<rect x="' + (cx - 8) + '" y="' + (cy - 5) + '" width="18" height="10" rx="5" fill="var(--pose-ink)"/>' +
+      '<rect x="' + (cx - 7) + '" y="' + (cy + 2) + '" width="16" height="3" rx="1.5" fill="var(--cream)"/>' +
+      "</g>";
+  }
+  function poseHand(cx, cy) {
+    return '<circle cx="' + cx + '" cy="' + cy + '" r="5.5" fill="var(--cream)" stroke="var(--pose-ink)" stroke-width="2.5"/>';
+  }
+  function poseHeadGroup(cx, cy, r, accent) {
+    return poseBangs(cx, cy, r) + poseHead(cx, cy, r) + posePigtail(cx, cy, r, -1) + posePigtail(cx, cy, r, 1) + poseFace(cx, cy, r, accent);
+  }
+
+  var CREAM = "var(--cream)";
+
+  var POSES = {
+    flex: function (top, soft) {
+      return capsule(46, 58, 43, 90, 11, CREAM) +
+        capsule(54, 58, 66, 64, 10, CREAM) + jointDot(66, 64, 10, CREAM) + capsule(66, 64, 58, 78, 9, CREAM) +
+        poseShoe(43, 92, -8) + poseShoe(58, 80, 25) +
+        poseTorso(39, 32, 22, 24, 10, top, -6, 50, 44) +
+        poseTorso(38, 50, 24, 12, 6, soft, -6, 50, 56) +
+        capsule(42, 36, 30, 14, 7, CREAM) + poseHand(29, 13) +
+        capsule(58, 38, 71, 48, 7, CREAM) + poseHand(72, 49) +
+        poseHeadGroup(48, 19, 10, top);
+    },
+    legs: function (top, soft) {
+      return capsule(43, 58, 37, 74, 9, CREAM) + jointDot(37, 74, 9, CREAM) + capsule(37, 74, 42, 92, 8, CREAM) +
+        capsule(57, 58, 63, 74, 9, CREAM) + jointDot(63, 74, 9, CREAM) + capsule(63, 74, 58, 92, 8, CREAM) +
+        poseShoe(41, 94, 0) + poseShoe(59, 94, 0) +
+        capsule(41, 40, 24, 46, 8, CREAM) + poseHand(21, 47) +
+        capsule(59, 40, 76, 46, 8, CREAM) + poseHand(79, 47) +
+        poseTorso(39, 30, 22, 18, 9, top, 0, 50, 39) +
+        poseTorso(38, 46, 24, 13, 6, soft, 0, 50, 52) +
+        poseHeadGroup(50, 18, 10, top);
+    },
+    arms: function (top, soft) {
+      return capsule(45, 62, 43, 90, 8, CREAM) + poseShoe(42, 92, 0) +
+        capsule(55, 62, 57, 90, 8, CREAM) + poseShoe(58, 92, 0) +
+        capsule(39, 38, 28, 50, 7, CREAM) + jointDot(28, 50, 7, CREAM) + capsule(28, 50, 37, 36, 7, CREAM) + poseHand(37, 36) +
+        capsule(61, 38, 72, 50, 7, CREAM) + jointDot(72, 50, 7, CREAM) + capsule(72, 50, 63, 36, 7, CREAM) + poseHand(63, 36) +
+        poseTorso(39, 30, 22, 24, 10, top, 0, 50, 42) +
+        poseTorso(38, 48, 24, 13, 6, soft, 0, 50, 54) +
+        poseHeadGroup(50, 18, 10, top);
+    },
+    core: function (top, soft) {
+      return capsule(52, 68, 64, 60, 9, CREAM) + jointDot(64, 60, 9, CREAM) + capsule(64, 60, 74, 70, 8, CREAM) + poseShoe(78, 72, 55) +
+        capsule(50, 68, 58, 62, 9, CREAM) + jointDot(58, 62, 9, CREAM) + capsule(58, 62, 50, 52, 8, CREAM) + poseShoe(51, 51, -45) +
+        capsule(40, 52, 30, 64, 7, CREAM) + poseHand(28, 66) +
+        poseTorso(34, 34, 20, 22, 10, top, 24, 44, 45) +
+        poseTorso(28, 52, 22, 12, 6, soft, 24, 44, 58) +
+        poseHeadGroup(38, 24, 9, top);
+    },
+    fullbody: function (top, soft) {
+      return capsule(50, 58, 29, 82, 10, CREAM) + poseShoe(26, 84, -30) +
+        capsule(50, 58, 71, 82, 10, CREAM) + poseShoe(74, 84, 30) +
+        capsule(44, 36, 21, 15, 7, CREAM) + poseHand(19, 13) +
+        capsule(56, 36, 79, 15, 7, CREAM) + poseHand(81, 13) +
+        poseTorso(40, 30, 20, 22, 10, top, 0, 50, 41) +
+        poseTorso(38, 46, 24, 12, 6, soft, 0, 50, 52) +
+        poseHeadGroup(50, 18, 10, top);
+    },
+    rest: function (top, soft) {
+      return '<ellipse cx="50" cy="80" rx="27" ry="8" fill="' + soft + '" stroke="var(--pose-ink)" stroke-width="2.5"/>' +
+        capsule(40, 64, 25, 58, 8, CREAM) + poseHand(22, 57) +
+        capsule(60, 64, 75, 58, 8, CREAM) + poseHand(78, 57) +
+        poseTorso(37, 32, 26, 30, 12, top, 0, 50, 47) +
+        poseHeadGroup(50, 24, 10, top);
+    }
+  };
+
+  function poseIconHTML(poseName, topColor, softColor, sizePx) {
+    return '<div style="width:' + sizePx + 'px; height:' + sizePx + 'px;">' +
+      '<svg viewBox="0 0 100 100" width="100%" height="100%">' + POSES[poseName](topColor, softColor) + "</svg>" +
+      "</div>";
+  }
+
+  function categoryIconHTML(category, sizePx) {
+    return poseIconHTML(CAT_HERO_POSE[category], CAT_TOP[category], CAT_SOFT[category], sizePx);
+  }
+
+  function zoneIconHTML(zone, category, sizePx) {
+    return poseIconHTML(ZONE_POSE[zone], CAT_TOP[category], CAT_SOFT[category], sizePx);
+  }
+
+  var EXERCISES = {
+    roll_up: { name: "Pilates Roll-Up", category: "Pilates", zone: "Core", work: 30, rest: 15, cal: 5 },
+    single_leg_stretch: { name: "Single-Leg Stretch", category: "Pilates", zone: "Core", work: 30, rest: 15, cal: 5 },
+    leg_circles: { name: "Leg Circles", category: "Pilates", zone: "Legs", work: 30, rest: 15, cal: 4 },
+    swan_prep: { name: "Swan Prep", category: "Pilates", zone: "Full Body", work: 30, rest: 15, cal: 5 },
+    side_leg_lift: { name: "Side-Lying Leg Lift", category: "Pilates", zone: "Legs", work: 30, rest: 15, cal: 4 },
+    hundred: { name: "Pilates Hundred", category: "Pilates", zone: "Core", work: 45, rest: 15, cal: 6 },
+    spine_twist: { name: "Spine Twist", category: "Pilates", zone: "Flexibility", work: 30, rest: 10, cal: 3 },
+    bridge_lift: { name: "Bridge Lift", category: "Pilates", zone: "Legs", work: 30, rest: 15, cal: 5 },
+    saw_stretch: { name: "Saw Stretch", category: "Pilates", zone: "Flexibility", work: 30, rest: 10, cal: 3 },
+    teaser_prep: { name: "Teaser Prep", category: "Pilates", zone: "Core", work: 30, rest: 15, cal: 5 },
+
+    squats: { name: "Bodyweight Squats", category: "Calisthenics", zone: "Legs", work: 40, rest: 15, cal: 8 },
+    pushups: { name: "Push-Ups", category: "Calisthenics", zone: "Arms", work: 30, rest: 15, cal: 8 },
+    reverse_lunges: { name: "Reverse Lunges", category: "Calisthenics", zone: "Legs", work: 40, rest: 15, cal: 7 },
+    plank_hold: { name: "Plank Hold", category: "Calisthenics", zone: "Core", work: 30, rest: 15, cal: 6 },
+    mountain_climbers: { name: "Mountain Climbers", category: "Calisthenics", zone: "Full Body", work: 30, rest: 15, cal: 9 },
+    tricep_dips: { name: "Tricep Dips", category: "Calisthenics", zone: "Arms", work: 30, rest: 15, cal: 7 },
+    glute_bridges: { name: "Glute Bridges", category: "Calisthenics", zone: "Legs", work: 30, rest: 15, cal: 6 },
+    burpees: { name: "Burpees", category: "Calisthenics", zone: "Full Body", work: 30, rest: 20, cal: 10 },
+    bicycle_crunches: { name: "Bicycle Crunches", category: "Calisthenics", zone: "Core", work: 30, rest: 15, cal: 7 },
+    jumping_jacks: { name: "Jumping Jacks", category: "Calisthenics", zone: "Full Body", work: 40, rest: 15, cal: 9 },
+
+    seated_cat_cow: { name: "Seated Cat-Cow", category: "Chair Yoga", zone: "Flexibility", work: 30, rest: 10, cal: 2 },
+    seated_fold: { name: "Seated Forward Fold", category: "Chair Yoga", zone: "Flexibility", work: 30, rest: 10, cal: 2 },
+    chair_pigeon: { name: "Chair Pigeon Stretch", category: "Chair Yoga", zone: "Flexibility", work: 30, rest: 10, cal: 2 },
+    seated_twist: { name: "Seated Twist", category: "Chair Yoga", zone: "Flexibility", work: 30, rest: 10, cal: 2 },
+    seated_side_bend: { name: "Seated Side Bend", category: "Chair Yoga", zone: "Flexibility", work: 30, rest: 10, cal: 2 },
+    chair_warrior_arms: { name: "Chair Warrior Arms", category: "Chair Yoga", zone: "Arms", work: 30, rest: 10, cal: 3 },
+    seated_leg_ext: { name: "Seated Leg Extension", category: "Chair Yoga", zone: "Legs", work: 30, rest: 10, cal: 3 },
+    seated_core_reach: { name: "Seated Core Reach", category: "Chair Yoga", zone: "Core", work: 30, rest: 10, cal: 3 },
+    chair_neck_release: { name: "Chair Neck Release", category: "Chair Yoga", zone: "Flexibility", work: 20, rest: 10, cal: 1 },
+    seated_breathing: { name: "Seated Breathing Flow", category: "Chair Yoga", zone: "Full Body", work: 30, rest: 10, cal: 2 }
+  };
+
+  var WORKOUTS = {
+    pilates_core_flow: { name: "Pilates Core Flow", category: "Pilates", zone: "Core", exercises: ["roll_up", "single_leg_stretch", "hundred", "teaser_prep", "spine_twist"] },
+    perfect_legs_day: { name: "Perfect Legs Day", category: "Pilates", zone: "Legs", exercises: ["leg_circles", "side_leg_lift", "bridge_lift", "swan_prep", "saw_stretch"] },
+    full_body_pilates: { name: "Full Body Pilates", category: "Pilates", zone: "Full Body", exercises: ["swan_prep", "hundred", "bridge_lift", "roll_up", "spine_twist", "teaser_prep"] },
+
+    lower_body_power: { name: "Lower Body Power", category: "Calisthenics", zone: "Legs", exercises: ["squats", "reverse_lunges", "glute_bridges", "jumping_jacks", "plank_hold"] },
+    upper_body_burn: { name: "Upper Body Burn", category: "Calisthenics", zone: "Arms", exercises: ["pushups", "tricep_dips", "plank_hold", "mountain_climbers"] },
+    full_body_calisthenics: { name: "Full Body Calisthenics", category: "Calisthenics", zone: "Full Body", exercises: ["burpees", "jumping_jacks", "mountain_climbers", "squats", "pushups", "bicycle_crunches"] },
+
+    gentle_morning_stretch: { name: "Gentle Morning Stretch", category: "Chair Yoga", zone: "Flexibility", exercises: ["seated_cat_cow", "seated_fold", "seated_twist", "chair_neck_release", "seated_breathing"] },
+    seated_flexibility_flow: { name: "Seated Flexibility Flow", category: "Chair Yoga", zone: "Flexibility", exercises: ["chair_pigeon", "seated_side_bend", "seated_twist", "seated_fold"] },
+    chair_yoga_full_body: { name: "Chair Yoga Full Body", category: "Chair Yoga", zone: "Full Body", exercises: ["seated_breathing", "chair_warrior_arms", "seated_leg_ext", "seated_core_reach", "seated_cat_cow"] }
+  };
+
+  var GOALS = [
+    { id: "lose_weight", label: "Lose weight", emoji: "🔥", desc: "More calisthenics, higher intensity", weights: { Calisthenics: 0.5, Pilates: 0.3, "Chair Yoga": 0.2 } },
+    { id: "tone_sculpt", label: "Tone & sculpt", emoji: "💪", desc: "Balanced Pilates and calisthenics", weights: { Pilates: 0.45, Calisthenics: 0.4, "Chair Yoga": 0.15 } },
+    { id: "flexibility_calm", label: "Flexibility & calm", emoji: "🌿", desc: "Gentle, mostly seated sessions", weights: { "Chair Yoga": 0.5, Pilates: 0.35, Calisthenics: 0.15 } },
+    { id: "general_fitness", label: "General fitness", emoji: "⚡", desc: "An even mix of everything", weights: { Pilates: 0.34, Calisthenics: 0.33, "Chair Yoga": 0.33 } }
+  ];
+
+  var LEVELS = [
+    { id: "beginner", label: "Beginner", emoji: "🌱", desc: "Shorter work intervals", mult: 0.75 },
+    { id: "intermediate", label: "Intermediate", emoji: "🚶", desc: "Standard interval length", mult: 1.0 },
+    { id: "advanced", label: "Advanced", emoji: "🏃", desc: "Longer, tougher intervals", mult: 1.3 }
+  ];
+
+  var DAY_OPTIONS = [3, 4, 5, 6, 7];
+
+  var WEEKLY_TEMPLATES = {
+    3: [true, false, true, false, true, false, false],
+    4: [true, false, true, false, true, false, true],
+    5: [true, true, false, true, true, false, true],
+    6: [true, true, true, true, true, true, false],
+    7: [true, true, true, true, true, true, true]
+  };
+
+  var PLAN_LENGTH = 14;
+  var REST_CAL_RATE = 1; // cal/min while resting between exercises
+
+  /* ---------------- State ---------------- */
+
+  var state = null;
+
+  function defaultState() {
+    return {
+      onboarded: false,
+      goal: null,
+      level: null,
+      daysPerWeek: null,
+      plan: [],
+      stats: { streak: 0, totalWorkouts: 0, totalMinutes: 0, totalCalories: 0 }
+    };
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) { /* corrupted storage, fall back to fresh state */ }
+    return defaultState();
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  /* ---------------- Plan generation ---------------- */
+
+  function weightedCategory(weights) {
+    var r = Math.random();
+    var acc = 0;
+    var cats = Object.keys(weights);
+    for (var i = 0; i < cats.length; i++) {
+      acc += weights[cats[i]];
+      if (r <= acc) return cats[i];
+    }
+    return cats[cats.length - 1];
+  }
+
+  function workoutsInCategory(cat) {
+    return Object.keys(WORKOUTS).filter(function (id) { return WORKOUTS[id].category === cat; });
+  }
+
+  function generatePlan(goalId, daysPerWeek) {
+    var goal = GOALS.filter(function (g) { return g.id === goalId; })[0];
+    var template = WEEKLY_TEMPLATES[daysPerWeek];
+    var plan = [];
+    var lastWorkoutId = null;
+    for (var i = 0; i < PLAN_LENGTH; i++) {
+      var isWorkoutDay = template[i % 7];
+      if (!isWorkoutDay) {
+        plan.push({ day: i + 1, type: "rest", workoutId: null, completed: false, completedAt: null });
+        continue;
+      }
+      var cat = weightedCategory(goal.weights);
+      var options = workoutsInCategory(cat).filter(function (id) { return id !== lastWorkoutId; });
+      if (options.length === 0) options = workoutsInCategory(cat);
+      var pick = options[Math.floor(Math.random() * options.length)];
+      lastWorkoutId = pick;
+      plan.push({ day: i + 1, type: "workout", workoutId: pick, completed: false, completedAt: null });
+    }
+    return plan;
+  }
+
+  function resolvedExercises(workoutId, levelMult) {
+    var w = WORKOUTS[workoutId];
+    return w.exercises.map(function (exId) {
+      var ex = EXERCISES[exId];
+      return {
+        id: exId,
+        name: ex.name,
+        category: ex.category,
+        zone: ex.zone,
+        work: Math.max(15, Math.round((ex.work * levelMult) / 5) * 5),
+        rest: ex.rest,
+        cal: ex.cal
+      };
+    });
+  }
+
+  function workoutSummary(workoutId, levelMult) {
+    var exs = resolvedExercises(workoutId, levelMult);
+    var totalSeconds = exs.reduce(function (s, e) { return s + e.work + e.rest; }, 0) - exs[exs.length - 1].rest;
+    var totalCal = exs.reduce(function (s, e) { return s + (e.cal * e.work) / 60; }, 0);
+    return {
+      minutes: Math.max(1, Math.round(totalSeconds / 60)),
+      calories: Math.round(totalCal),
+      exercises: exs
+    };
+  }
+
+  function levelMult() {
+    var lvl = LEVELS.filter(function (l) { return l.id === state.level; })[0];
+    return lvl ? lvl.mult : 1.0;
+  }
+
+  /* ---------------- Navigation ---------------- */
+
+  var MAIN_TABS = ["screen-today", "screen-library", "screen-progress", "screen-profile"];
+
+  function show(id) {
+    document.querySelectorAll(".screen").forEach(function (el) { el.classList.remove("active"); });
+    document.getElementById(id).classList.add("active");
+
+    var navBar = document.getElementById("nav-bar");
+    if (MAIN_TABS.indexOf(id) !== -1) {
+      navBar.classList.add("visible");
+      document.querySelectorAll(".nav-item").forEach(function (btn) {
+        btn.classList.toggle("active", btn.getAttribute("data-tab") === id);
+      });
+    } else {
+      navBar.classList.remove("visible");
+    }
+
+    if (id === "screen-today") renderToday();
+    if (id === "screen-library") renderLibrary();
+    if (id === "screen-progress") renderProgress();
+    if (id === "screen-profile") renderProfile();
+  }
+  window.show = show;
+
+  /* ---------------- Onboarding ---------------- */
+
+  var onbData = { goal: null, level: null, days: null };
+  var onbStepIndex = 0;
+
+  function renderOnbOptions(containerId, items, key, labelKey) {
+    var el = document.getElementById(containerId);
+    el.innerHTML = "";
+    items.forEach(function (item) {
+      var div = document.createElement("div");
+      div.className = "option-card";
+      div.innerHTML =
+        '<div class="emoji">' + item.emoji + "</div>" +
+        '<div><div class="label">' + item.label + '</div><div class="desc">' + item.desc + "</div></div>";
+      div.onclick = function () {
+        onbData[key] = item.id;
+        Array.prototype.forEach.call(el.children, function (c) { c.classList.remove("selected"); });
+        div.classList.add("selected");
+        setTimeout(onbNext, 200);
+      };
+      el.appendChild(div);
+    });
+  }
+
+  function renderDaysOptions() {
+    var el = document.getElementById("onb-days");
+    el.innerHTML = "";
+    DAY_OPTIONS.forEach(function (n) {
+      var div = document.createElement("div");
+      div.className = "option-card";
+      div.innerHTML = '<div class="emoji">📅</div><div><div class="label">' + n + " day" + (n > 1 ? "s" : "") + ' / week</div><div class="desc">' +
+        (7 - n) + " rest day" + (7 - n === 1 ? "" : "s") + " per week</div></div>";
+      div.onclick = function () {
+        onbData.days = n;
+        Array.prototype.forEach.call(el.children, function (c) { c.classList.remove("selected"); });
+        div.classList.add("selected");
+        setTimeout(onbNext, 200);
+      };
+      el.appendChild(div);
+    });
+  }
+
+  function onbNext() {
+    var steps = document.querySelectorAll(".onb-step");
+    if (onbStepIndex >= steps.length - 1) return;
+    steps[onbStepIndex].classList.remove("active");
+    onbStepIndex++;
+    steps[onbStepIndex].classList.add("active");
+    if (onbStepIndex === 4) {
+      state.goal = onbData.goal;
+      state.level = onbData.level;
+      state.daysPerWeek = onbData.days;
+      state.plan = generatePlan(state.goal, state.daysPerWeek);
+      var goalLabel = GOALS.filter(function (g) { return g.id === state.goal; })[0].label;
+      document.getElementById("onb-summary").textContent =
+        "A " + PLAN_LENGTH + "-day plan focused on “" + goalLabel + "”, " + state.daysPerWeek + " days a week. You can regenerate it anytime from Profile.";
+    }
+  }
+  window.onbNext = onbNext;
+
+  function finishOnboarding() {
+    state.onboarded = true;
+    saveState();
+    show("screen-today");
+  }
+  window.finishOnboarding = finishOnboarding;
+
+  function startOnboardingFlow() {
+    onbData = { goal: null, level: null, days: null };
+    onbStepIndex = 0;
+    document.querySelectorAll(".onb-step").forEach(function (el, i) { el.classList.toggle("active", i === 0); });
+    renderOnbOptions("onb-goals", GOALS, "goal");
+    renderOnbOptions("onb-levels", LEVELS, "level");
+    renderDaysOptions();
+    show("screen-onboarding");
+  }
+
+  /* ---------------- Today screen ---------------- */
+
+  function findCurrentDayIndex() {
+    for (var i = 0; i < state.plan.length; i++) {
+      if (!state.plan[i].completed) return i;
+    }
+    return state.plan.length - 1;
+  }
+
+  function renderToday() {
+    var idx = findCurrentDayIndex();
+    var entry = state.plan[idx];
+    var content = document.getElementById("today-content");
+    document.getElementById("today-datesub").textContent = "Day " + entry.day + " of " + state.plan.length;
+
+    var html = "";
+    if (entry.type === "rest") {
+      html += '<div class="today-card">' +
+        '<span class="zone-chip RestDay">REST DAY</span>' +
+        '<div class="today-illustration RestDay">' + poseIconHTML("rest", "var(--muted)", "var(--line)", 72) + "</div>" +
+        '<div class="today-title">Recovery day</div>' +
+        '<div class="today-meta">No workout scheduled. Stretch, hydrate, and come back tomorrow.</div>' +
+        '<button class="btn-secondary" onclick="markRestDone(' + idx + ')">Mark as done</button>' +
+        "</div>";
+    } else {
+      var summary = workoutSummary(entry.workoutId, levelMult());
+      var w = WORKOUTS[entry.workoutId];
+      var catClass = CAT_CLASS[w.category];
+      html += '<div class="today-card">' +
+        '<span class="zone-chip ' + catClass + '">' + w.zone.toUpperCase() + "</span>" +
+        '<div class="today-illustration ' + catClass + '">' + categoryIconHTML(w.category, 72) + "</div>" +
+        '<div class="today-title">' + w.name + "</div>" +
+        '<div class="today-meta">' + summary.minutes + " Min &middot; " + summary.calories + " Cal &middot; " + w.category + "</div>" +
+        '<button class="btn-primary" onclick="openDetail(\'' + entry.workoutId + "', " + idx + ')">Start Workout</button>' +
+        "</div>";
+    }
+
+    html += '<div class="section-label">Your plan</div><div class="day-grid" id="day-grid"></div>';
+    html += '<div class="streak-row">' +
+      '<div class="stat-box"><div class="n">' + state.stats.streak + '</div><div class="l">STREAK</div></div>' +
+      '<div class="stat-box"><div class="n">' + state.stats.totalWorkouts + '</div><div class="l">WORKOUTS</div></div>' +
+      '<div class="stat-box"><div class="n">' + state.stats.totalCalories + '</div><div class="l">TOTAL CAL</div></div>' +
+      "</div>";
+
+    content.innerHTML = html;
+
+    var grid = document.getElementById("day-grid");
+    state.plan.forEach(function (d, i) {
+      var pill = document.createElement("div");
+      var cls = "day-pill";
+      var mark = "•";
+      if (d.completed) { cls += " done"; mark = "✓"; }
+      else if (d.type === "rest") { cls += " rest"; mark = "–"; }
+      else { cls += " upcoming"; mark = "○"; }
+      if (i === idx) cls += " current";
+      pill.className = cls;
+      pill.innerHTML = '<div class="num">DAY ' + d.day + '</div><div class="mark">' + mark + "</div>";
+      pill.onclick = function () {
+        if (d.type === "rest") return;
+        openDetail(d.workoutId, i);
+      };
+      grid.appendChild(pill);
+    });
+  }
+  window.renderToday = renderToday;
+
+  function markRestDone(idx) {
+    state.plan[idx].completed = true;
+    state.plan[idx].completedAt = Date.now();
+    saveState();
+    renderToday();
+  }
+  window.markRestDone = markRestDone;
+
+  /* ---------------- Library ---------------- */
+
+  var libActiveCat = "Pilates";
+
+  function renderLibrary() {
+    var tabsEl = document.getElementById("lib-tabs");
+    var cats = ["Pilates", "Calisthenics", "Chair Yoga"];
+    tabsEl.innerHTML = "";
+    cats.forEach(function (c) {
+      var tab = document.createElement("div");
+      tab.className = "cat-tab" + (c === libActiveCat ? " active" : "");
+      tab.textContent = c;
+      tab.onclick = function () { libActiveCat = c; renderLibrary(); };
+      tabsEl.appendChild(tab);
+    });
+
+    var content = document.getElementById("lib-content");
+    content.innerHTML = "";
+    workoutsInCategory(libActiveCat).forEach(function (id) {
+      var w = WORKOUTS[id];
+      var summary = workoutSummary(id, levelMult());
+      var card = document.createElement("div");
+      card.className = "workout-card";
+      card.innerHTML =
+        '<div class="ic ' + CAT_CLASS[w.category] + '">' + categoryIconHTML(w.category, 32) + "</div>" +
+        '<div class="info"><div class="n">' + w.name + '</div><div class="m">' + summary.minutes + " Min &middot; " + summary.calories + " Cal &middot; " + w.zone + "</div></div>" +
+        '<div class="chev">›</div>';
+      card.onclick = function () { openDetail(id, null); };
+      content.appendChild(card);
+    });
+  }
+  window.renderLibrary = renderLibrary;
+
+  /* ---------------- Detail ---------------- */
+
+  var detailContext = { workoutId: null, planIndex: null };
+
+  function openDetail(workoutId, planIndex) {
+    detailContext.workoutId = workoutId;
+    detailContext.planIndex = planIndex;
+    var w = WORKOUTS[workoutId];
+    var summary = workoutSummary(workoutId, levelMult());
+    var catClass = CAT_CLASS[w.category];
+
+    document.getElementById("detail-illustration").className = "detail-illustration " + catClass;
+    document.getElementById("detail-illustration").innerHTML = categoryIconHTML(w.category, 120);
+    document.getElementById("detail-chip").className = "zone-chip " + catClass;
+    document.getElementById("detail-chip").textContent = w.zone.toUpperCase();
+    document.getElementById("detail-title").textContent = w.name;
+    document.getElementById("detail-meta").textContent = summary.minutes + " Min  ·  " + summary.calories + " Cal  ·  " + w.category;
+
+    var list = document.getElementById("detail-exercises");
+    list.innerHTML = "";
+    summary.exercises.forEach(function (e) {
+      var row = document.createElement("div");
+      row.className = "exercise-row";
+      row.innerHTML = '<div class="e">' + zoneIconHTML(e.zone, e.category, 26) + '</div><div class="name">' + e.name + '</div><div class="dur">' + e.work + "s</div>";
+      list.appendChild(row);
+    });
+
+    show("screen-detail");
+  }
+  window.openDetail = openDetail;
+
+  function backFromDetail() {
+    show(detailContext.planIndex !== null ? "screen-today" : "screen-library");
+  }
+  window.backFromDetail = backFromDetail;
+
+  /* ---------------- Player ---------------- */
+
+  var player = null;
+
+  function buildSteps(exercises) {
+    var steps = [];
+    exercises.forEach(function (ex, i) {
+      steps.push({ kind: "work", exIndex: i });
+      if (i < exercises.length - 1) steps.push({ kind: "rest", exIndex: i });
+    });
+    return steps;
+  }
+
+  function startPlayer() {
+    var summary = workoutSummary(detailContext.workoutId, levelMult());
+    var w = WORKOUTS[detailContext.workoutId];
+    player = {
+      workoutName: w.name,
+      exercises: summary.exercises,
+      steps: buildSteps(summary.exercises),
+      stepIndex: 0,
+      secondsLeft: 0,
+      elapsed: 0,
+      calories: 0,
+      running: true,
+      timerId: null
+    };
+    player.secondsLeft = durationForStep(player.steps[0]);
+    document.getElementById("player-workout-name").textContent = w.name;
+    renderPlayerDots();
+    renderPlayerFrame();
+    show("screen-player");
+    player.timerId = setInterval(playerTick, 1000);
+  }
+  window.startPlayer = startPlayer;
+
+  function durationForStep(step) {
+    var ex = player.exercises[step.exIndex];
+    return step.kind === "work" ? ex.work : ex.rest;
+  }
+
+  function renderPlayerDots() {
+    var dotsEl = document.getElementById("player-dots");
+    dotsEl.innerHTML = "";
+    player.exercises.forEach(function (_, i) {
+      var span = document.createElement("span");
+      dotsEl.appendChild(span);
+    });
+    updatePlayerDots();
+  }
+
+  function updatePlayerDots() {
+    var dotsEl = document.getElementById("player-dots");
+    var currentExIndex = player.steps[player.stepIndex].exIndex;
+    Array.prototype.forEach.call(dotsEl.children, function (dot, i) {
+      dot.className = "";
+      if (i < currentExIndex) dot.classList.add("done");
+      else if (i === currentExIndex) dot.classList.add("now");
+    });
+  }
+
+  function fmtClock(totalSeconds) {
+    var m = Math.floor(totalSeconds / 60);
+    var s = totalSeconds % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  function renderPlayerFrame() {
+    var step = player.steps[player.stepIndex];
+    var ex = player.exercises[step.exIndex];
+    var isRest = step.kind === "rest";
+
+    document.getElementById("player-emoji").innerHTML = isRest
+      ? poseIconHTML("rest", CAT_TOP[ex.category], CAT_SOFT[ex.category], 96)
+      : zoneIconHTML(ex.zone, ex.category, 96);
+    document.getElementById("player-state").textContent = isRest ? "Rest" : ex.zone;
+    document.getElementById("player-name").textContent = isRest ? "Get ready" : ex.name;
+    document.getElementById("player-timer").textContent = fmtClock(player.secondsLeft);
+    document.getElementById("player-elapsed").textContent = fmtClock(player.elapsed);
+    document.getElementById("player-cal").textContent = Math.round(player.calories);
+    document.getElementById("player-playbtn").textContent = player.running ? "Pause" : "Resume";
+
+    var nextEl = document.getElementById("player-next");
+    var upcoming = null;
+    for (var i = player.stepIndex + 1; i < player.steps.length; i++) {
+      if (player.steps[i].kind === "work") { upcoming = player.exercises[player.steps[i].exIndex]; break; }
+    }
+    if (upcoming) {
+      nextEl.innerHTML = '<div class="e">' + zoneIconHTML(upcoming.zone, upcoming.category, 22) + '</div><div><div class="t">UP NEXT</div><div class="n">' + upcoming.name + "</div></div>";
+    } else {
+      nextEl.innerHTML = '<div class="e">🏁</div><div><div class="t">UP NEXT</div><div class="n">Final stretch</div></div>';
+    }
+
+    updatePlayerDots();
+  }
+
+  function playerTick() {
+    if (!player.running) return;
+    var step = player.steps[player.stepIndex];
+    var ex = player.exercises[step.exIndex];
+    player.secondsLeft--;
+    player.elapsed++;
+    player.calories += (step.kind === "work" ? ex.cal : REST_CAL_RATE) / 60;
+
+    if (player.secondsLeft <= 0) {
+      advanceStep();
+    } else {
+      renderPlayerFrame();
+    }
+  }
+
+  function advanceStep() {
+    if (player.stepIndex + 1 >= player.steps.length) {
+      finishWorkout();
+      return;
+    }
+    player.stepIndex++;
+    player.secondsLeft = durationForStep(player.steps[player.stepIndex]);
+    renderPlayerFrame();
+  }
+
+  function playerNext() { advanceStep(); }
+  window.playerNext = playerNext;
+
+  function playerPrev() {
+    if (player.stepIndex === 0) {
+      player.secondsLeft = durationForStep(player.steps[0]);
+    } else {
+      player.stepIndex--;
+      player.secondsLeft = durationForStep(player.steps[player.stepIndex]);
+    }
+    renderPlayerFrame();
+  }
+  window.playerPrev = playerPrev;
+
+  function playerToggle() {
+    player.running = !player.running;
+    renderPlayerFrame();
+  }
+  window.playerToggle = playerToggle;
+
+  function stopPlayerTimer() {
+    if (player && player.timerId) {
+      clearInterval(player.timerId);
+      player.timerId = null;
+    }
+  }
+
+  function closePlayer() {
+    if (player.elapsed > 5 && !confirm("End this workout early? Progress for today won't be saved.")) return;
+    stopPlayerTimer();
+    show(detailContext.planIndex !== null ? "screen-today" : "screen-library");
+  }
+  window.closePlayer = closePlayer;
+
+  function finishWorkout() {
+    stopPlayerTimer();
+    var totalMinutes = Math.round(player.elapsed / 60);
+    var totalCalories = Math.round(player.calories);
+
+    if (detailContext.planIndex !== null) {
+      var entry = state.plan[detailContext.planIndex];
+      entry.completed = true;
+      entry.completedAt = Date.now();
+    }
+    state.stats.totalWorkouts++;
+    state.stats.totalMinutes += totalMinutes;
+    state.stats.totalCalories += totalCalories;
+    state.stats.streak = computeStreak();
+    saveState();
+
+    document.getElementById("complete-time").textContent = fmtClock(player.elapsed);
+    document.getElementById("complete-cal").textContent = totalCalories;
+    document.getElementById("complete-streak").textContent = state.stats.streak;
+    show("screen-complete");
+  }
+
+  function computeStreak() {
+    var lastDoneIdx = -1;
+    for (var i = state.plan.length - 1; i >= 0; i--) {
+      if (state.plan[i].completed) { lastDoneIdx = i; break; }
+    }
+    if (lastDoneIdx === -1) return 0;
+    var streak = 0;
+    for (var j = lastDoneIdx; j >= 0; j--) {
+      var d = state.plan[j];
+      if (d.type === "rest") continue;
+      if (d.completed) streak++;
+      else break;
+    }
+    return streak;
+  }
+
+  function finishComplete() {
+    show("screen-today");
+  }
+  window.finishComplete = finishComplete;
+
+  /* ---------------- Progress ---------------- */
+
+  function renderProgress() {
+    var content = document.getElementById("progress-content");
+    var html = '<div class="streak-hero"><div class="flame">🔥</div><div class="n">' + state.stats.streak + '</div><div class="l">day streak</div></div>';
+    html += '<div class="streak-row">' +
+      '<div class="stat-box"><div class="n">' + state.stats.totalWorkouts + '</div><div class="l">WORKOUTS</div></div>' +
+      '<div class="stat-box"><div class="n">' + state.stats.totalMinutes + '</div><div class="l">MINUTES</div></div>' +
+      '<div class="stat-box"><div class="n">' + state.stats.totalCalories + '</div><div class="l">CALORIES</div></div>' +
+      "</div>";
+    html += '<div class="section-label">Plan history</div><div class="progress-days" id="progress-days"></div>';
+    content.innerHTML = html;
+
+    var list = document.getElementById("progress-days");
+    state.plan.forEach(function (d) {
+      var row = document.createElement("div");
+      row.className = "prog-row";
+      var mk = d.completed ? "✓" : (d.type === "rest" ? "–" : "○");
+      var label = d.type === "rest" ? "Rest day" : WORKOUTS[d.workoutId].name;
+      var status = d.completed ? "Completed" : (d.type === "rest" ? "Optional" : "Not done yet");
+      row.innerHTML = '<div class="mk">' + mk + '</div><div class="txt"><div class="n">Day ' + d.day + " · " + label + '</div><div class="s">' + status + "</div></div>";
+      list.appendChild(row);
+    });
+  }
+  window.renderProgress = renderProgress;
+
+  /* ---------------- Profile ---------------- */
+
+  function renderProfile() {
+    var goal = GOALS.filter(function (g) { return g.id === state.goal; })[0];
+    var level = LEVELS.filter(function (l) { return l.id === state.level; })[0];
+    var content = document.getElementById("profile-content");
+    content.innerHTML =
+      '<div class="profile-card">' +
+      '<div class="profile-row"><div class="k">Goal</div><div class="v">' + (goal ? goal.label : "–") + "</div></div>" +
+      '<div class="profile-row"><div class="k">Level</div><div class="v">' + (level ? level.label : "–") + "</div></div>" +
+      '<div class="profile-row"><div class="k">Schedule</div><div class="v">' + state.daysPerWeek + " days / week</div></div>" +
+      '<div class="profile-row"><div class="k">Plan length</div><div class="v">' + PLAN_LENGTH + " days</div></div>" +
+      "</div>" +
+      '<button class="btn-secondary" style="margin-bottom:10px;" onclick="regeneratePlan()">Regenerate plan</button>' +
+      '<button class="btn-danger" onclick="resetAllData()">Reset all data</button>' +
+      '<div class="privacy-note">Everything — your plan, streaks and stats — lives only in this browser\'s local storage on this device.<br>No account. No sync. No network requests.</div>';
+  }
+  window.renderProfile = renderProfile;
+
+  function regeneratePlan() {
+    if (!confirm("Generate a new " + PLAN_LENGTH + "-day plan? Your streak and history will restart.")) return;
+    state.plan = generatePlan(state.goal, state.daysPerWeek);
+    state.stats = { streak: 0, totalWorkouts: state.stats.totalWorkouts, totalMinutes: state.stats.totalMinutes, totalCalories: state.stats.totalCalories };
+    saveState();
+    show("screen-today");
+  }
+  window.regeneratePlan = regeneratePlan;
+
+  function resetAllData() {
+    if (!confirm("This clears your goal, plan and all stats from this device. Continue?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state = defaultState();
+    startOnboardingFlow();
+  }
+  window.resetAllData = resetAllData;
+
+  /* ---------------- Init ---------------- */
+
+  document.addEventListener("DOMContentLoaded", function () {
+    state = loadState();
+    if (state.onboarded && state.plan && state.plan.length) {
+      show("screen-today");
+    } else {
+      startOnboardingFlow();
+    }
+  });
+})();
+</script>
