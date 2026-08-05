@@ -176,6 +176,9 @@ input[type=text]::placeholder{ font-weight:500; color:var(--ink-soft); opacity:.
   padding:2px 5px; margin-right:5px; vertical-align:1px;
 }
 .word-example{ font-style:italic; font-size:12px; color:var(--ink-soft); margin-top:6px; opacity:.85; }
+.word-item-edit{ flex-direction:column; align-items:stretch; }
+.word-item-edit input[type=text]{ background:var(--card); }
+.word-item-edit .row{ margin-top:10px; }
 .box-dots{ display:flex; gap:3px; flex-shrink:0; }
 .box-dots i{ width:6px; height:6px; border-radius:50%; background:var(--line); display:block; }
 .box-dots i.on{ background:var(--sage); }
@@ -406,6 +409,7 @@ input[type=file]{ display:none; }
   /* ---------- Minimal single-colour icon set (no emoji) ---------- */
   const ICON_SPEAKER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></svg>';
   const ICON_FLAME = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path d="M12 2c1 3-3 4-3 8a3 3 0 0 0 6 0c1 1 2 2.5 2 4.5A5 5 0 0 1 7 14.5C7 9 12 7 12 2z"/></svg>';
+  const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
 
   /* ---------- Cloud sync (Firebase) ----------
      Loaded lazily via dynamic import so that a blocked/unreachable
@@ -472,8 +476,16 @@ input[type=file]{ display:none; }
     return dateStr(d);
   }
 
+  /* Upgrades older saved words (single "example" string) to the current
+     "examples" array shape, so a word can carry several sentences. */
+  function migrateWord(w){
+    if(!Array.isArray(w.examples)){
+      w.examples = w.example ? [w.example] : [];
+    }
+    return w;
+  }
   function loadWords(){
-    try{ return JSON.parse(localStorage.getItem(LS_WORDS)) || []; }catch(e){ return []; }
+    try{ return (JSON.parse(localStorage.getItem(LS_WORDS)) || []).map(migrateWord); }catch(e){ return []; }
   }
   function saveWords(w){
     try{
@@ -531,7 +543,7 @@ input[type=file]{ display:none; }
 
   function refreshFromRemoteData(remote){
     applyingRemote = true;
-    words = mergeWordLists(words, remote.words || []);
+    words = mergeWordLists(words, (remote.words || []).map(migrateWord));
     stats = Object.assign({}, stats, remote.stats || {});
     saveWords(words);
     saveStats(stats);
@@ -748,27 +760,33 @@ input[type=file]{ display:none; }
     return translateCandidatesAttempt(text, lang);
   }
 
-  async function fetchExample(word){
-    if(!word || /\s/.test(word)) return null;
+  /* Collects several distinct example sentences (not just one), so the same
+     word can come up in different contexts across practice sessions instead
+     of the same fixed sentence every time. */
+  async function fetchExamples(word){
+    if(!word || /\s/.test(word)) return [];
     const ctrl = new AbortController();
     const t = setTimeout(()=>ctrl.abort(), 12000);
     try{
       const res = await fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word.toLowerCase()), {signal: ctrl.signal});
       clearTimeout(t);
-      if(!res.ok) return null;
+      if(!res.ok) return [];
       const data = await res.json();
-      if(!Array.isArray(data)) return null;
+      if(!Array.isArray(data)) return [];
+      const seen = new Set();
+      const out = [];
       for(const entry of data){
         for(const m of (entry.meanings||[])){
           for(const d of (m.definitions||[])){
-            if(d.example) return d.example;
+            if(d.example) pushUnique(out, seen, d.example);
+            if(out.length >= 5) return out;
           }
         }
       }
-      return null;
+      return out;
     }catch(e){
       clearTimeout(t);
-      return null;
+      return [];
     }
   }
 
@@ -790,6 +808,7 @@ input[type=file]{ display:none; }
   }
 
   let lastAutoTranslated = '';
+  let pendingExamples = []; // extra example sentences fetched for the word currently in the Add form
   async function runTranslate(word, silent){
     if(!word) return;
     if(!silent){
@@ -797,7 +816,7 @@ input[type=file]{ display:none; }
       var original = btnTranslate.innerHTML;
       btnTranslate.innerHTML = '<span class="spinner"></span> Ищу...';
     }
-    const [ruList, daList, example] = await Promise.all([translateCandidates(word,'ru'), translateCandidates(word,'da'), fetchExample(word)]);
+    const [ruList, daList, examples] = await Promise.all([translateCandidates(word,'ru'), translateCandidates(word,'da'), fetchExamples(word)]);
     if(inEn.value.trim() !== word) return; // word changed while we were waiting — discard stale result
     if(!silent){
       btnTranslate.disabled = false;
@@ -806,7 +825,10 @@ input[type=file]{ display:none; }
     let gotAny = false;
     if(ruList.length){ if(!inRu.value.trim()) inRu.value = ruList[0]; gotAny = true; }
     if(daList.length){ if(!inDa.value.trim()) inDa.value = daList[0]; gotAny = true; }
-    if(example && !inExample.value.trim()){ inExample.value = example; }
+    if(examples.length){
+      if(!inExample.value.trim()) inExample.value = examples[0];
+      pendingExamples = examples;
+    }
     renderCandidates('ruCandidates', inRu, ruList);
     renderCandidates('daCandidates', inDa, daList);
     if(!silent){
@@ -826,7 +848,7 @@ input[type=file]{ display:none; }
   inEn.addEventListener('input', ()=>{
     clearTimeout(autoTranslateTimer);
     const word = inEn.value.trim();
-    if(word !== lastAutoTranslated) clearCandidates();
+    if(word !== lastAutoTranslated){ clearCandidates(); pendingExamples = []; }
     if(word.length < 2 || word === lastAutoTranslated) return;
     autoTranslateTimer = setTimeout(()=>{
       const current = inEn.value.trim();
@@ -843,8 +865,12 @@ input[type=file]{ display:none; }
     const example = inExample.value.trim();
     if(!en){ toast('Введи английское слово'); inEn.focus(); return; }
     if(!ru && !da){ toast('Добавь хотя бы один перевод'); return; }
+    const seenEx = new Set();
+    const examples = [];
+    pushUnique(examples, seenEx, example);
+    pendingExamples.forEach(e => pushUnique(examples, seenEx, e));
     words.unshift({
-      id: uid(), en, ru, da, example,
+      id: uid(), en, ru, da, examples,
       box: 0,
       nextReview: today(),
       createdAt: today(),
@@ -852,6 +878,7 @@ input[type=file]{ display:none; }
     });
     saveWords(words);
     inEn.value=''; inRu.value=''; inDa.value=''; inExample.value='';
+    pendingExamples = [];
     clearCandidates();
     inEn.focus();
     toast('Добавлено: '+en);
@@ -871,12 +898,16 @@ input[type=file]{ display:none; }
   }
 
   /* ---------- Words list ---------- */
+  let editingWordId = null;
+
   function wordItemHtml(w, showDots){
+    if(w.id === editingWordId) return wordEditHtml(w);
     const dots = showDots ? '<div class="box-dots">'+Array.from({length:MAX_BOX+1}).map((_,i)=>`<i class="${i<=w.box?'on':''}"></i>`).join('')+'</div>' : '';
     const tr = [];
     if(w.ru) tr.push('<span><span class="lang-tag">RU</span><b>'+esc(w.ru)+'</b></span>');
     if(w.da) tr.push('<span><span class="lang-tag">DA</span><b>'+esc(w.da)+'</b></span>');
-    const exampleHtml = w.example ? `<div class="word-example">"${esc(w.example)}"</div>` : '';
+    const primaryExample = w.examples && w.examples[0];
+    const exampleHtml = primaryExample ? `<div class="word-example">"${esc(primaryExample)}"</div>` : '';
     return `<div class="word-item" data-id="${w.id}">
       <div class="word-main">
         <div class="word-en">${esc(w.en)}</div>
@@ -885,12 +916,66 @@ input[type=file]{ display:none; }
       </div>
       ${dots}
       <button class="icon-btn" data-speak="${esc(w.en)}" title="Прослушать" aria-label="Прослушать произношение">${ICON_SPEAKER}</button>
+      <button class="icon-btn" data-edit="${w.id}" title="Изменить" aria-label="Изменить слово ${esc(w.en)}">${ICON_EDIT}</button>
       <button class="icon-btn" data-del="${w.id}" title="Удалить">✕</button>
     </div>`;
   }
+
+  function wordEditHtml(w){
+    const ex = (w.examples && w.examples[0]) || '';
+    return `<div class="word-item word-item-edit" data-id="${w.id}">
+      <input type="text" class="edit-en" value="${esc(w.en)}" placeholder="Английское слово">
+      <div class="row">
+        <input type="text" class="edit-ru" value="${esc(w.ru)}" placeholder="По-русски">
+        <input type="text" class="edit-da" value="${esc(w.da)}" placeholder="По-датски">
+      </div>
+      <input type="text" class="edit-example" value="${esc(ex)}" placeholder="Пример предложения" style="margin-top:10px;">
+      <div class="btn-block-row">
+        <button class="btn btn-outline" type="button" data-cancel-edit="${w.id}">Отмена</button>
+        <button class="btn btn-primary" type="button" data-save-edit="${w.id}">Сохранить</button>
+      </div>
+    </div>`;
+  }
+
   function bindWordItemEvents(root){
     root.querySelectorAll('[data-speak]').forEach(btn=>{
       btn.addEventListener('click', ()=> speak(btn.dataset.speak, 'en-US'));
+    });
+    root.querySelectorAll('[data-edit]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        editingWordId = btn.dataset.edit;
+        renderWordsList(); renderRecent();
+      });
+    });
+    root.querySelectorAll('[data-cancel-edit]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        editingWordId = null;
+        renderWordsList(); renderRecent();
+      });
+    });
+    root.querySelectorAll('[data-save-edit]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.dataset.saveEdit;
+        const w = words.find(x=>x.id===id);
+        if(!w) return;
+        const row = btn.closest('.word-item-edit');
+        const en = row.querySelector('.edit-en').value.trim();
+        const ru = row.querySelector('.edit-ru').value.trim();
+        const da = row.querySelector('.edit-da').value.trim();
+        const example = row.querySelector('.edit-example').value.trim();
+        if(!en){ toast('Введи английское слово'); return; }
+        if(!ru && !da){ toast('Добавь хотя бы один перевод'); return; }
+        w.en = en; w.ru = ru; w.da = da;
+        const seenEx = new Set();
+        const examples = [];
+        pushUnique(examples, seenEx, example);
+        (w.examples||[]).slice(1).forEach(e => pushUnique(examples, seenEx, e));
+        w.examples = examples;
+        editingWordId = null;
+        saveWords(words);
+        renderWordsList(); renderRecent();
+        toast('Изменения сохранены');
+      });
     });
     root.querySelectorAll('[data-del]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -1030,11 +1115,14 @@ input[type=file]{ display:none; }
     const progressPct = Math.round((session.done/session.total)*100);
     const langLabel = lang==='ru' ? 'русский' : 'датский';
 
-    const directionPool = word.example ? ['en2tr','tr2en','cloze'] : ['en2tr','tr2en'];
+    const hasExamples = word.examples && word.examples.length;
+    // pick a different sentence each round rather than always the same one
+    const roundExample = hasExamples ? word.examples[Math.floor(Math.random()*word.examples.length)] : null;
+    const directionPool = roundExample ? ['en2tr','tr2en','cloze'] : ['en2tr','tr2en'];
     let direction = directionPool[Math.floor(Math.random()*directionPool.length)];
     let blanked = null;
     if(direction === 'cloze'){
-      blanked = blankWord(word.example, word.en);
+      blanked = blankWord(roundExample, word.en);
       if(!blanked) direction = 'en2tr'; // the example uses an inflected form we can't cleanly blank — fall back
     }
 
@@ -1045,7 +1133,7 @@ input[type=file]{ display:none; }
         <div class="quiz-sentence quiz-cloze">${blanked}</div>`;
     }else if(direction === 'en2tr'){
       correctVal = word[lang];
-      const sentenceHtml = word.example ? `<div class="quiz-sentence">${highlightWord(word.example, word.en)}</div>` : '';
+      const sentenceHtml = roundExample ? `<div class="quiz-sentence">${highlightWord(roundExample, word.en)}</div>` : '';
       promptHtml = `<div class="quiz-label">Что значит это слово? (${langLabel})</div>
         ${sentenceHtml}
         <div class="quiz-word-row">
@@ -1250,8 +1338,10 @@ input[type=file]{ display:none; }
         if(confirm('Импортировать '+data.words.length+' слов? Это добавит их к текущему списку.')){
           const existingEn = new Set(words.map(w=>w.en.toLowerCase()));
           const toAdd = data.words.filter(w=> w && w.en && !existingEn.has(w.en.toLowerCase()));
-          words = words.concat(toAdd.map(w=>({
-            id: w.id || uid(), en:w.en, ru:w.ru||'', da:w.da||'', example:w.example||'',
+          words = words.concat(toAdd.map(w=> migrateWord({
+            id: w.id || uid(), en:w.en, ru:w.ru||'', da:w.da||'',
+            examples: Array.isArray(w.examples) ? w.examples : undefined,
+            example: w.example||'',
             box: typeof w.box==='number'?w.box:0,
             nextReview: w.nextReview || today(),
             createdAt: w.createdAt || today(),
