@@ -1355,7 +1355,7 @@ input[type=file]{ display:none; }
     ['different-touchpoints','across different touchpoints','в разных точках контакта','We implemented the identity across different touchpoints.','Brand'],
     ['brand-guidelines','established brand guidelines','утверждённые бренд-гайдлайны','I can work creatively within established brand guidelines.','Brand'],
     ['brand-guardian','brand guardian','хранитель бренда','A brand guardian protects consistency and helps the brand evolve.','Brand'],
-    ['bring-brand-life','bring the brand to life','воплощать бренд в жизнь','I enjoy bringing a brand to life across digital and print.','Brand'],
+    ['bring-brand-life','bring the brand to life','воплощать бренд в жизнь','I try to bring the brand to life in everything I design.','Brand'],
     ['concept-delivery','from concept to final delivery','от концепции до финальной реализации','I manage projects from concept to final delivery.','Process'],
     ['concept-development','concept development','разработка концепции','I start with research before moving into concept development.','Process'],
     ['translate-strategy','translate brand strategy into visual solutions','переводить стратегию бренда в визуальные решения','My role is to translate brand strategy into visual solutions.','Process'],
@@ -1373,7 +1373,21 @@ input[type=file]{ display:none; }
     ['balance-priorities','balance priorities and deadlines','сочетать приоритеты и сроки','I balance priorities and deadlines by agreeing on scope early.','Delivery'],
     ['manage-projects','manage multiple projects','вести несколько проектов','I use a clear overview to manage multiple projects.','Delivery'],
     ['digital-print','digital, print and physical environments','цифровые, печатные и физические носители','My experience covers digital, print and physical environments.','Delivery'],
-    ['brand-evolve','help the brand evolve','помогать бренду развиваться','Consistency matters, but I also look for ways to help the brand evolve.','Brand']
+    ['brand-evolve','help the brand evolve','помогать бренду развиваться','Consistency matters, but I also look for ways to help the brand evolve.','Brand'],
+    ['strong-visual-direction','strong visual direction','чёткое визуальное направление','I set a strong visual direction for the campaign from day one.','Brand'],
+    ['stays-consistent','making sure it stays consistent','следить, чтобы всё оставалось последовательным','Part of my role is making sure it stays consistent across every channel.','Brand'],
+    ['enjoy-creating','I enjoy creating','мне нравится создавать','I enjoy creating work that feels both strategic and human.','Process'],
+    ['strong-experience','gave me strong experience','дало мне серьёзный опыт','That project gave me strong experience in managing stakeholder expectations.','Delivery'],
+    ['maintaining-brand-consistency','maintaining brand consistency','поддержание последовательности бренда','Maintaining brand consistency across markets was one of my core responsibilities.','Brand'],
+    ['agreed-with-stakeholders','was agreed with stakeholders','было согласовано со стейкхолдерами','The final direction was agreed with stakeholders before we moved into production.','Collaboration'],
+    ['implemented-the-identity','implemented the identity','внедрила айдентику','I implemented the identity across the website, packaging and social channels.','Delivery'],
+    ['full-creative-process','responsible for the full creative process','отвечала за весь творческий процесс','I was responsible for the full creative process, from concept to final delivery.','Process'],
+    ['stakeholder-approval','stakeholder approval','одобрение стейкхолдеров','I presented the concepts and secured stakeholder approval before development began.','Collaboration'],
+    ['established-guidelines','established guidelines','утверждённые гайдлайны','I worked within established guidelines while still finding room for creativity.','Brand'],
+    ['broader-responsibility','broader responsibility','более широкая зона ответственности','Over time, my role grew into a broader responsibility for the whole brand system.','Delivery'],
+    ['identity-from-scratch','identity from scratch','айдентика с нуля','I built the identity from scratch, from the logo to the full brand system.','Brand'],
+    ['both-sides-branding','both sides of branding','обе стороны брендинга','These two experiences have given me both sides of branding.','Brand'],
+    ['created-design-guide','created a design guide','создала гайд по дизайну','I created a design guide and implemented the identity across different touchpoints.','Delivery']
   ];
   const INTERVIEW_QUESTIONS = [
     {text:'How do you approach a rebranding project from the first brief to delivery?', ids:['visual-direction','concept-delivery','translate-strategy']},
@@ -1411,7 +1425,7 @@ input[type=file]{ display:none; }
     interviewSession=null;
     const due=dueInterview(), counts=stateCounts();
     document.getElementById('practiceArea').innerHTML=`<div class="card interview-hero">
-      <div class="eyebrow">Interview collection · 25 phrases</div>
+      <div class="eyebrow">Interview collection · ${interviewData.phrases.length} phrases</div>
       <div class="collection-title">JBT Marel Interview</div>
       <div class="muted">Активная лексика для уверенных ответов о бренде, процессе и работе со стейкхолдерами.</div>
       <div class="collection-meta">
