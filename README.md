@@ -1,11 +1,26 @@
-<div align="center">
+# Kopilka Slov
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+A compact, browser-based vocabulary app with two practice modes:
 
-  <h1>Built with AI Studio</h2>
+- **Words** — the original vocabulary collection, translations, examples, spaced repetition, statistics, optional Firebase sync, and JSON backup.
+- **Interview** — an active Interview Vocabulary Trainer with the preloaded **JBT Marel Interview** collection.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Interview Practice MVP
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+- 25 interview phrases grouped around brand, process, strategy, collaboration, and delivery
+- Phrase states: New → Learning → Familiar → Interview-ready
+- Daily sequence: Learn → Recall → Fill the gap → Speak → Repeat difficult phrases
+- Spoken interview questions with 2–3 target phrases
+- Browser speech recognition with a typed-answer fallback
+- Local phrase-use tracking and spaced repetition
+- Interview progress included in JSON export/import
 
-</div>
+Interview progress is stored locally in the current browser. The existing word data and Firebase synchronization format are unchanged.
+
+## Run
+
+Serve this folder with any simple static web server and open `index.html`. No build step is required.
+
+## Design notes
+
+See `INTERVIEW_TRAINER_DESIGN.md` for the agreed scope, architecture, assumptions, and decision log.

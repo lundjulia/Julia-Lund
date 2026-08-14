@@ -271,6 +271,46 @@ input[type=text]::placeholder{ font-weight:500; color:var(--ink-soft); opacity:.
 .io-row{ display:flex; gap:10px; margin-top:16px; }
 .io-row .btn{ flex:1; }
 input[type=file]{ display:none; }
+
+/* Interview trainer */
+.practice-switch{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; margin-bottom:18px; background:var(--card); border:1px solid var(--line); border-radius:15px; }
+.practice-mode{ border:0; border-radius:11px; padding:11px 10px; background:transparent; color:var(--ink-soft); font:700 13px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+.practice-mode.active{ background:var(--accent-ghost); color:var(--accent-2); }
+.interview-hero{ position:relative; overflow:hidden; text-align:left; padding:24px; background:linear-gradient(145deg,#251d35 0%,#181326 70%); }
+.interview-hero::after{ content:""; position:absolute; width:150px; height:150px; right:-58px; top:-62px; border:24px solid rgba(255,191,107,.13); border-radius:50%; }
+.eyebrow{ color:var(--gold); font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+.collection-title{ font-size:24px; line-height:1.15; font-weight:800; margin:8px 0 7px; letter-spacing:-.025em; }
+.collection-meta{ display:flex; gap:8px; flex-wrap:wrap; margin:18px 0; }
+.state-chip{ border-radius:999px; padding:7px 10px; font-size:11px; font-weight:800; background:var(--paper-2); border:1px solid var(--line); color:var(--ink-soft); }
+.state-chip b{ color:var(--ink); }
+.state-chip.ready{ color:var(--sage); }
+.session-map{ display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin-bottom:18px; }
+.session-step{ text-align:center; min-width:0; }
+.session-step i{ display:block; width:100%; height:4px; border-radius:5px; background:var(--line); margin-bottom:6px; }
+.session-step span{ display:block; overflow:hidden; text-overflow:ellipsis; font-size:9px; color:var(--ink-soft); font-style:normal; font-weight:700; }
+.session-step.active i,.session-step.done i{ background:var(--gold); }
+.session-step.active span{ color:var(--gold); }
+.interview-card{ position:relative; min-height:260px; padding:28px 24px 24px; }
+.stage-count{ position:absolute; top:20px; right:20px; font-size:11px; color:var(--ink-soft); font-weight:700; }
+.phrase-display{ font-size:clamp(25px,6vw,34px); line-height:1.18; font-weight:800; letter-spacing:-.03em; margin:22px 0 12px; }
+.phrase-meaning{ color:var(--accent-2); font-size:15px; line-height:1.5; font-weight:600; }
+.phrase-example{ margin-top:20px; padding-top:18px; border-top:1px solid var(--line); color:var(--ink-soft); font-size:13px; font-style:italic; line-height:1.6; }
+.phrase-actions{ display:flex; align-items:center; gap:10px; margin-top:22px; }
+.phrase-actions .btn{ flex:1; }
+.interview-input{ margin-top:18px; }
+.interview-input.good{ border-color:var(--sage)!important; }
+.interview-input.bad{ border-color:var(--wrong)!important; }
+.target-list{ display:flex; flex-wrap:wrap; gap:8px; margin:18px 0; }
+.target-phrase{ padding:8px 11px; border-radius:10px; background:var(--paper-2); border:1px solid var(--line); color:var(--accent-2); font-size:12px; font-weight:800; }
+.target-phrase.used{ color:var(--sage); border-color:rgba(111,227,168,.42); background:var(--sage-ghost); }
+.mic-btn{ width:100%; margin-top:10px; background:var(--paper-2); border:1.5px solid var(--line); color:var(--ink); }
+.mic-btn.listening{ border-color:var(--wrong); color:var(--wrong); animation:micPulse 1.2s ease-in-out infinite; }
+@keyframes micPulse{50%{box-shadow:0 0 0 7px var(--wrong-ghost)}}
+.answer-feedback{ border-radius:14px; padding:13px 15px; margin-top:14px; font-size:13px; font-weight:700; line-height:1.45; }
+.answer-feedback.good{ color:var(--sage); background:var(--sage-ghost); }
+.answer-feedback.bad{ color:var(--wrong); background:var(--wrong-ghost); }
+@media(max-width:390px){ .session-step span{display:none}.interview-card{padding:26px 18px 20px}.row{flex-direction:column}.collection-title{font-size:22px} }
+@media(prefers-reduced-motion:reduce){ *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important} }
 </style>
 </head>
 <body>
@@ -343,6 +383,10 @@ input[type=file]{ display:none; }
   <!-- PRACTICE -->
   <section id="view-practice" class="view">
     <h2 class="section-title">Практика</h2>
+    <div class="practice-switch" role="tablist" aria-label="Режим практики">
+      <button class="practice-mode active" id="modeWords" role="tab" aria-selected="true">Слова</button>
+      <button class="practice-mode" id="modeInterview" role="tab" aria-selected="false">Interview</button>
+    </div>
     <div id="practiceArea"></div>
   </section>
 
@@ -460,6 +504,7 @@ input[type=file]{ display:none; }
   const LS_WORDS = 'evt_words_v1';
   const LS_STATS = 'evt_stats_v1';
   const LS_LAST_SAVE = 'evt_last_save_v1';
+  const LS_INTERVIEW = 'evt_interview_v1';
   const INTERVALS = [0,1,2,4,7,14,30]; // days, index = box (0..6, 6 = mastered plateau)
   const MAX_BOX = INTERVALS.length - 1;
 
@@ -1019,13 +1064,30 @@ input[type=file]{ display:none; }
   /* ---------- Practice ---------- */
   const SESSION_CAP = 15;
   let session = null; // {queue:[...], done:0, correctCount:0, wrongCount:0}
+  let practiceMode = 'words';
+
+  function setPracticeMode(mode){
+    practiceMode = mode;
+    document.getElementById('modeWords').classList.toggle('active', mode==='words');
+    document.getElementById('modeInterview').classList.toggle('active', mode==='interview');
+    document.getElementById('modeWords').setAttribute('aria-selected', mode==='words');
+    document.getElementById('modeInterview').setAttribute('aria-selected', mode==='interview');
+    renderPracticeHome();
+  }
+  document.getElementById('modeWords').addEventListener('click', ()=>setPracticeMode('words'));
+  document.getElementById('modeInterview').addEventListener('click', ()=>setPracticeMode('interview'));
+
+  function renderPracticeHome(){
+    if(practiceMode === 'interview') renderInterviewHome();
+    else renderWordPracticeHome();
+  }
 
   function dueWords(){
     const t = today();
     return words.filter(w => w.nextReview <= t);
   }
 
-  function renderPracticeHome(){
+  function renderWordPracticeHome(){
     const area = document.getElementById('practiceArea');
     session = null;
     if(!words.length){
@@ -1283,6 +1345,207 @@ input[type=file]{ display:none; }
     document.getElementById('streakBadge').classList.toggle('zero', !(stats.streak>0));
   }
 
+  /* ---------- Interview vocabulary trainer ---------- */
+  const INTERVIEW_INTERVALS = [0,1,3,7,14];
+  const INTERVIEW_STATES = ['New','Learning','Familiar','Interview-ready'];
+  const INTERVIEW_SEED = [
+    ['visual-direction','visual direction','визуальное направление','I created a clear visual direction for the brand.','Brand'],
+    ['visual-identity','visual identity','визуальная айдентика','I developed the visual identity from scratch.','Brand'],
+    ['brand-consistency','brand consistency','последовательность бренда','I was responsible for maintaining brand consistency.','Brand'],
+    ['different-touchpoints','across different touchpoints','в разных точках контакта','We implemented the identity across different touchpoints.','Brand'],
+    ['brand-guidelines','established brand guidelines','утверждённые бренд-гайдлайны','I can work creatively within established brand guidelines.','Brand'],
+    ['brand-guardian','brand guardian','хранитель бренда','A brand guardian protects consistency and helps the brand evolve.','Brand'],
+    ['bring-brand-life','bring the brand to life','воплощать бренд в жизнь','I enjoy bringing a brand to life across digital and print.','Brand'],
+    ['concept-delivery','from concept to final delivery','от концепции до финальной реализации','I manage projects from concept to final delivery.','Process'],
+    ['concept-development','concept development','разработка концепции','I start with research before moving into concept development.','Process'],
+    ['translate-strategy','translate brand strategy into visual solutions','переводить стратегию бренда в визуальные решения','My role is to translate brand strategy into visual solutions.','Process'],
+    ['design-reasoning','design reasoning','логика дизайн-решения','I explain my design reasoning clearly to stakeholders.','Collaboration'],
+    ['stakeholder-needs','understand stakeholder needs','понимать потребности стейкхолдеров','I ask questions to understand stakeholder needs.','Collaboration'],
+    ['find-common-ground','find common ground','находить общую позицию','When opinions differ, I try to find common ground.','Collaboration'],
+    ['take-feedback','take feedback personally','принимать обратную связь на личный счёт','I do not take feedback personally; I focus on the objective.','Collaboration'],
+    ['creative-consultation','provide creative consultation','давать творческие рекомендации','I provide creative consultation early in the process.','Collaboration'],
+    ['challenge-brief','challenge the brief constructively','конструктивно оспаривать бриф','Sometimes I challenge the brief constructively to improve the outcome.','Collaboration'],
+    ['audience-experience','audience experience','опыт аудитории','Every decision should support the audience experience.','Strategy'],
+    ['user-focused','user-focused design','дизайн, ориентированный на пользователя','I aim to create clear, user-focused design.','Strategy'],
+    ['visual-storytelling','visual storytelling','визуальный сторителлинг','Strong visual storytelling makes complex messages easier to understand.','Strategy'],
+    ['brand-awareness','strengthen brand awareness','повышать узнаваемость бренда','Consistent communication helps strengthen brand awareness.','Strategy'],
+    ['cross-functional','cross-functional stakeholders','стейкхолдеры из разных отделов','I am comfortable working with cross-functional stakeholders.','Collaboration'],
+    ['balance-priorities','balance priorities and deadlines','сочетать приоритеты и сроки','I balance priorities and deadlines by agreeing on scope early.','Delivery'],
+    ['manage-projects','manage multiple projects','вести несколько проектов','I use a clear overview to manage multiple projects.','Delivery'],
+    ['digital-print','digital, print and physical environments','цифровые, печатные и физические носители','My experience covers digital, print and physical environments.','Delivery'],
+    ['brand-evolve','help the brand evolve','помогать бренду развиваться','Consistency matters, but I also look for ways to help the brand evolve.','Brand']
+  ];
+  const INTERVIEW_QUESTIONS = [
+    {text:'How do you approach a rebranding project from the first brief to delivery?', ids:['visual-direction','concept-delivery','translate-strategy']},
+    {text:'How do you make sure a global brand stays consistent across many formats?', ids:['brand-consistency','different-touchpoints','brand-guardian']},
+    {text:'How do you handle stakeholder feedback when people disagree?', ids:['design-reasoning','find-common-ground','take-feedback']},
+    {text:'How do you turn a communication need into an effective design solution?', ids:['stakeholder-needs','audience-experience','visual-storytelling']},
+    {text:'How do you manage several projects with competing deadlines?', ids:['manage-projects','balance-priorities','cross-functional']},
+    {text:'What does it mean to bring a brand to life in this role?', ids:['bring-brand-life','digital-print','brand-awareness']}
+  ];
+
+  function freshInterviewPhrase(seed){
+    return {id:seed[0], text:seed[1], ru:seed[2], example:seed[3], category:seed[4], state:0, box:0,
+      nextReview:today(), correct:0, wrong:0, spokenUses:0, difficult:false, updatedAt:Date.now()};
+  }
+  function loadInterview(){
+    let saved = {};
+    try{ saved = JSON.parse(localStorage.getItem(LS_INTERVIEW)) || {}; }catch(e){}
+    const oldMap = new Map((saved.phrases||[]).map(p=>[p.id,p]));
+    return {version:1, phrases:INTERVIEW_SEED.map(seed=>Object.assign(freshInterviewPhrase(seed),oldMap.get(seed[0])||{},
+      {id:seed[0],text:seed[1],ru:seed[2],example:seed[3],category:seed[4]})), sessions:saved.sessions||0};
+  }
+  let interviewData = loadInterview();
+  let interviewSession = null;
+  function saveInterview(){
+    try{ localStorage.setItem(LS_INTERVIEW,JSON.stringify(interviewData)); }
+    catch(e){ toast('Не получилось сохранить прогресс интервью'); }
+  }
+  function interviewPhrase(id){ return interviewData.phrases.find(p=>p.id===id); }
+  function dueInterview(){
+    const t=today();
+    return interviewData.phrases.filter(p=>p.nextReview<=t).sort((a,b)=>Number(b.difficult)-Number(a.difficult)||a.box-b.box);
+  }
+  function stateCounts(){ return INTERVIEW_STATES.map((_,i)=>interviewData.phrases.filter(p=>p.state===i).length); }
+  function renderInterviewHome(){
+    interviewSession=null;
+    const due=dueInterview(), counts=stateCounts();
+    document.getElementById('practiceArea').innerHTML=`<div class="card interview-hero">
+      <div class="eyebrow">Interview collection · 25 phrases</div>
+      <div class="collection-title">JBT Marel Interview</div>
+      <div class="muted">Активная лексика для уверенных ответов о бренде, процессе и работе со стейкхолдерами.</div>
+      <div class="collection-meta">
+        <span class="state-chip"><b>${counts[0]}</b> New</span><span class="state-chip"><b>${counts[1]}</b> Learning</span>
+        <span class="state-chip"><b>${counts[2]}</b> Familiar</span><span class="state-chip ready"><b>${counts[3]}</b> Interview-ready</span>
+      </div>
+      <button class="btn btn-primary" id="btnInterviewStart">${due.length?'Начать · '+Math.min(5,due.length)+' фраз':'Дополнительная практика'}</button>
+    </div><div class="card"><div class="eyebrow">Сегодня</div><div style="font-size:18px;font-weight:800;margin:8px 0 5px;">${due.length?due.length+' фраз на повторении':'Всё повторено'}</div>
+      <div class="muted">Learn → Recall → Fill the gap → Speak → Repeat difficult phrases</div></div>`;
+    document.getElementById('btnInterviewStart').addEventListener('click',()=>startInterviewSession(!due.length));
+  }
+  function startInterviewSession(extra){
+    let pool=extra?shuffle(interviewData.phrases).slice(0,5):dueInterview().slice(0,5);
+    if(!pool.length) pool=shuffle(interviewData.phrases).slice(0,5);
+    const ids=pool.map(p=>p.id);
+    const question=INTERVIEW_QUESTIONS.find(q=>q.ids.some(id=>ids.includes(id)))||INTERVIEW_QUESTIONS[0];
+    const targets=question.ids.map(interviewPhrase).filter(Boolean).slice(0,3);
+    interviewSession={ids,stage:'learn',index:0,difficult:new Set(),results:{},question,targets,used:[],spokenTranscript:'',completed:0};
+    ids.forEach(id=>interviewSession.results[id]={successes:0,failures:0});
+    renderInterviewStage();
+  }
+  function stageMap(active){
+    const stages=[['learn','Learn'],['recall','Recall'],['fill','Fill'],['speak','Speak'],['repeat','Repeat']];
+    const activeIndex=stages.findIndex(s=>s[0]===active);
+    return `<div class="session-map">${stages.map((s,i)=>`<div class="session-step ${i===activeIndex?'active':i<activeIndex?'done':''}"><i></i><span>${s[1]}</span></div>`).join('')}</div>`;
+  }
+  function interviewProgressLabel(){ return (interviewSession.index+1)+' / '+interviewSession.ids.length; }
+  function renderInterviewStage(){
+    const s=interviewSession;
+    if(s.stage==='learn') return renderInterviewLearn();
+    if(s.stage==='recall') return renderInterviewRecall();
+    if(s.stage==='fill') return renderInterviewFill();
+    if(s.stage==='speak') return renderInterviewSpeak();
+    if(s.stage==='repeat') return renderInterviewRepeat();
+  }
+  function interviewShell(content){ document.getElementById('practiceArea').innerHTML=stageMap(interviewSession.stage)+content; }
+  function advanceInterviewStage(next){ interviewSession.stage=next; interviewSession.index=0; renderInterviewStage(); }
+  function renderInterviewLearn(){
+    const p=interviewPhrase(interviewSession.ids[interviewSession.index]);
+    interviewShell(`<div class="card interview-card"><div class="eyebrow">Learn · ${esc(p.category)}</div><div class="stage-count">${interviewProgressLabel()}</div>
+      <div class="phrase-display">${esc(p.text)}</div><div class="phrase-meaning">${esc(p.ru)}</div><div class="phrase-example">“${esc(p.example)}”</div>
+      <div class="phrase-actions"><button class="speak-btn" id="btnPhraseSound" aria-label="Прослушать">${ICON_SPEAKER}</button><button class="btn btn-primary" id="btnPhraseNext">Понятно</button></div></div>`);
+    document.getElementById('btnPhraseSound').addEventListener('click',()=>speak(p.text,'en-US'));
+    document.getElementById('btnPhraseNext').addEventListener('click',()=>{ if(++interviewSession.index>=interviewSession.ids.length) advanceInterviewStage('recall'); else renderInterviewLearn(); });
+  }
+  function renderInterviewRecall(){
+    const p=interviewPhrase(interviewSession.ids[interviewSession.index]);
+    interviewShell(`<div class="card interview-card"><div class="eyebrow">Recall · Вспомни вслух</div><div class="stage-count">${interviewProgressLabel()}</div>
+      <div class="phrase-display" style="font-size:25px">${esc(p.ru)}</div><div class="muted">Как это сказать по-английски?</div>
+      <div class="phrase-actions"><button class="btn btn-ghost" id="btnReveal">Показать ответ</button></div><div id="recallAnswer"></div></div>`);
+    document.getElementById('btnReveal').addEventListener('click',()=>{
+      document.getElementById('recallAnswer').innerHTML=`<div class="answer-feedback good">${esc(p.text)}</div><div class="btn-block-row"><button class="btn btn-outline" id="btnRecallNo">Повторить</button><button class="btn btn-primary" id="btnRecallYes">Вспомнила</button></div>`;
+      document.getElementById('btnReveal').disabled=true;
+      document.getElementById('btnRecallNo').addEventListener('click',()=>scoreInterviewItem(p.id,false,'recall'));
+      document.getElementById('btnRecallYes').addEventListener('click',()=>scoreInterviewItem(p.id,true,'recall'));
+    });
+  }
+  function scoreInterviewItem(id,ok,stage){
+    const r=interviewSession.results[id];
+    if(ok) r.successes++; else {r.failures++;interviewSession.difficult.add(id);}
+    interviewSession.index++;
+    if(interviewSession.index>=interviewSession.ids.length) advanceInterviewStage(stage==='recall'?'fill':'speak'); else renderInterviewStage();
+  }
+  function normalizeAnswer(v){ return (v||'').toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9' ]/g,' ').replace(/\s+/g,' ').trim(); }
+  function renderInterviewFill(){
+    const p=interviewPhrase(interviewSession.ids[interviewSession.index]);
+    const re=new RegExp(p.text.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i');
+    const prompt=esc(p.example.replace(re,'_____'));
+    interviewShell(`<div class="card interview-card"><div class="eyebrow">Fill the gap</div><div class="stage-count">${interviewProgressLabel()}</div>
+      <div class="phrase-example" style="border:0;padding:0;margin-top:28px;font-size:17px;color:var(--ink)">“${prompt}”</div>
+      <input class="interview-input" id="fillAnswer" type="text" autocomplete="off" placeholder="Type the missing phrase">
+      <button class="btn btn-primary" id="btnCheckFill" style="margin-top:12px">Проверить</button><div id="fillFeedback"></div></div>`);
+    const check=()=>{ const input=document.getElementById('fillAnswer'); const ok=normalizeAnswer(input.value)===normalizeAnswer(p.text); input.classList.add(ok?'good':'bad');
+      document.getElementById('fillFeedback').innerHTML=`<div class="answer-feedback ${ok?'good':'bad'}">${ok?'Верно':'Ответ: '+esc(p.text)}</div><button class="btn btn-primary" id="btnFillNext" style="margin-top:10px">Продолжить</button>`;
+      document.getElementById('btnCheckFill').disabled=true; document.getElementById('btnFillNext').addEventListener('click',()=>scoreInterviewItem(p.id,ok,'fill')); };
+    document.getElementById('btnCheckFill').addEventListener('click',check); document.getElementById('fillAnswer').addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+  }
+  function phraseWasUsed(transcript,phrase){ return normalizeAnswer(transcript).includes(normalizeAnswer(phrase.text)); }
+  function renderInterviewSpeak(){
+    const s=interviewSession;
+    interviewShell(`<div class="card interview-card"><div class="eyebrow">Speak · Interview answer</div><div class="phrase-display" style="font-size:23px">${esc(s.question.text)}</div>
+      <div class="muted">Ответь вслух и постарайся использовать эти фразы:</div><div class="target-list">${s.targets.map(p=>`<span class="target-phrase" data-target="${p.id}">${esc(p.text)}</span>`).join('')}</div>
+      <button class="btn mic-btn" id="btnMic">● Начать запись ответа</button><label for="spokenText">Или введи ответ</label>
+      <input type="text" id="spokenText" value="${esc(s.spokenTranscript)}" placeholder="Type or dictate your answer">
+      <button class="btn btn-primary" id="btnCheckSpeech" style="margin-top:12px">Проверить фразы</button><div id="speechFeedback"></div></div>`);
+    const field=document.getElementById('spokenText'); field.addEventListener('input',()=>{s.spokenTranscript=field.value;});
+    document.getElementById('btnMic').addEventListener('click',startInterviewRecognition);
+    document.getElementById('btnCheckSpeech').addEventListener('click',checkInterviewSpeech);
+  }
+  function startInterviewRecognition(){
+    const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SpeechRecognition){ toast('Распознавание речи недоступно — введи ответ в поле'); document.getElementById('spokenText').focus(); return; }
+    const btn=document.getElementById('btnMic'), rec=new SpeechRecognition(); rec.lang='en-US'; rec.interimResults=true; rec.continuous=false;
+    btn.classList.add('listening'); btn.textContent='● Слушаю…';
+    rec.onresult=e=>{ let text=''; for(let i=0;i<e.results.length;i++) text+=e.results[i][0].transcript+' '; interviewSession.spokenTranscript=text.trim(); document.getElementById('spokenText').value=interviewSession.spokenTranscript; };
+    rec.onerror=()=>toast('Не удалось услышать ответ — можно напечатать его');
+    rec.onend=()=>{btn.classList.remove('listening');btn.textContent='● Записать ещё раз';}; rec.start();
+  }
+  function checkInterviewSpeech(){
+    const s=interviewSession, text=document.getElementById('spokenText').value.trim();
+    if(!text){toast('Сначала скажи или введи ответ');return;}
+    s.spokenTranscript=text; s.used=s.targets.filter(p=>phraseWasUsed(text,p));
+    s.targets.forEach(p=>{const el=document.querySelector(`[data-target="${p.id}"]`);if(s.used.some(x=>x.id===p.id))el.classList.add('used');else s.difficult.add(p.id);});
+    const missing=s.targets.filter(p=>!s.used.some(x=>x.id===p.id));
+    document.getElementById('speechFeedback').innerHTML=`<div class="answer-feedback ${missing.length?'bad':'good'}">Использовано: ${s.used.length} из ${s.targets.length}.${missing.length?' Попробуем ещё: '+missing.map(p=>esc(p.text)).join(', '):' Отлично — фразы появились в живом ответе.'}</div><button class="btn btn-primary" id="btnSpeechNext" style="margin-top:10px">Продолжить</button>`;
+    document.getElementById('btnCheckSpeech').disabled=true; document.getElementById('btnSpeechNext').addEventListener('click',()=>advanceInterviewStage('repeat'));
+  }
+  function renderInterviewRepeat(){
+    const ids=Array.from(interviewSession.difficult);
+    if(!ids.length) return finishInterviewSession();
+    if(interviewSession.index>=ids.length) return finishInterviewSession();
+    const p=interviewPhrase(ids[interviewSession.index]);
+    interviewShell(`<div class="card interview-card"><div class="eyebrow">Repeat difficult · ${interviewSession.index+1} / ${ids.length}</div>
+      <div class="phrase-display">${esc(p.text)}</div><div class="phrase-meaning">${esc(p.ru)}</div><div class="phrase-example">“${esc(p.example)}”</div>
+      <div class="phrase-actions"><button class="speak-btn" id="btnRepeatSound">${ICON_SPEAKER}</button><button class="btn btn-primary" id="btnRepeatNext">Повторила вслух</button></div></div>`);
+    document.getElementById('btnRepeatSound').addEventListener('click',()=>speak(p.text,'en-US'));
+    document.getElementById('btnRepeatNext').addEventListener('click',()=>{interviewSession.index++;renderInterviewRepeat();});
+  }
+  function finishInterviewSession(){
+    const s=interviewSession;
+    s.ids.forEach(id=>{ const p=interviewPhrase(id),r=s.results[id],spoken=s.used.some(x=>x.id===id);
+      p.correct+=(r.successes||0);p.wrong+=(r.failures||0);if(spoken)p.spokenUses++;
+      if(r.failures||s.difficult.has(id)){p.box=0;p.nextReview=addDays(today(),1);p.difficult=true;}else{p.box=Math.min(p.box+1,INTERVIEW_INTERVALS.length-1);p.nextReview=addDays(today(),INTERVIEW_INTERVALS[p.box]);p.difficult=false;}
+      if(p.spokenUses>0&&p.box>=3)p.state=3;else if(p.box>=2)p.state=2;else if(p.correct>0)p.state=1;else p.state=0;p.updatedAt=Date.now();
+    });
+    s.used.forEach(p=>{if(!s.ids.includes(p.id)){p.spokenUses++;p.state=Math.max(p.state,1);p.updatedAt=Date.now();}});
+    interviewData.sessions++;saveInterview();updateStreak();stats.sessions=(stats.sessions||0)+1;saveStats(stats);renderHeaderStreak();
+    const counts=stateCounts();
+    document.getElementById('practiceArea').innerHTML=`${stageMap('done')}<div class="card session-end"><div class="eyebrow">Session complete</div><div style="font-weight:800;font-size:24px;margin-top:9px">Фразы становятся активными</div>
+      <div class="muted" style="margin-top:7px">Использовано в ответе: ${s.used.length} · На повторение: ${s.difficult.size}</div><div class="stat-pills"><div class="pill">Familiar: <b>${counts[2]}</b></div><div class="pill">Interview-ready: <b>${counts[3]}</b></div></div>
+      <button class="btn btn-primary" id="btnInterviewDone">Готово</button></div>`;
+    document.getElementById('btnInterviewDone').addEventListener('click',renderInterviewHome);
+  }
+
   /* ---------- Stats view ---------- */
   function renderStats(){
     const total = words.length;
@@ -1322,7 +1585,7 @@ input[type=file]{ display:none; }
   }
 
   document.getElementById('btnExport').addEventListener('click', ()=>{
-    const payload = { words, stats, exportedAt: new Date().toISOString() };
+    const payload = { words, stats, interview:interviewData, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1353,6 +1616,16 @@ input[type=file]{ display:none; }
             createdAt: w.createdAt || today(),
             correct: w.correct||0, wrong: w.wrong||0
           })));
+          if(data.interview && Array.isArray(data.interview.phrases)){
+            const importedMap=new Map(data.interview.phrases.filter(p=>p&&p.id).map(p=>[p.id,p]));
+            interviewData.phrases=interviewData.phrases.map(current=>{
+              const incoming=importedMap.get(current.id);
+              if(!incoming)return current;
+              return (incoming.updatedAt||0)>(current.updatedAt||0)?Object.assign({},current,incoming,{id:current.id,text:current.text,ru:current.ru,example:current.example,category:current.category}):current;
+            });
+            interviewData.sessions=Math.max(interviewData.sessions||0,data.interview.sessions||0);
+            saveInterview();
+          }
           saveWords(words);
           toast('Импортировано слов: '+toAdd.length);
           renderWordsList(); renderStats(); renderRecent();
